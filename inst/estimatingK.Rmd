@@ -1,0 +1,321 @@
+---
+title: "Clustering on Devo's Servers"
+author: "Inés Añíbarro Gorostiza"
+date: "11 de diciembre de 2018"
+output: pdf_document
+params:
+  df: 'default'
+---
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+#Loading the packages
+#ipak <- function(pkg){
+#  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+#  if (length(new.pkg))
+#    install.packages(new.pkg, dependencies = TRUE)
+#  sapply(pkg, require, character.only = TRUE)
+#}
+
+#packages <- c('ggfortify', 'cluster', 'EMCluster', 'dbscan', 'factoextra', 'dbscan')
+#ipak(packages)
+
+library(ggfortify)
+library(cluster)
+library(EMCluster)
+library(dbscan)
+library(factoextra)
+```
+
+The **aim** of this study is to compare the results obtained on the same data with three clustering algorithms: **K-means**, **Hierarchical Clustering** and **DBSCAN**. The parallel objective is to explore how to tune the parameters of each algorithm.
+
+
+**Data used:**
+
+```{r, echo=FALSE}
+#setwd('/home/ines/Documentos/Repositorios/stan/research')
+#data <- read.csv('verificacionPRO.txt', header = FALSE)
+data <- params$df
+```
+
+
+```{r, echo = F, warning = F, message = F}
+message('data')
+message(head(data))
+message(colnames(data))
+message(dim(data)[0])
+message(dim(data)[1])
+```
+
+
+We will use data from Devo corresponding to the behaviour of the different servers Devo has. This data can be found in the box.stat.unix.dstatLt1 table.
+
+The dataset contains `r dim(data)[2]` observations.
+
+The table has 33 numerical features describing the servers. It is necessary to start by scaling the features as the units are not uniform over the dataset.
+
+```{r, echo=FALSE}
+#check if column has constant variance and remove them
+col <- dim(data[, sapply(data, function(v) var(v, na.rm=TRUE)==0)])
+```
+
+```{r, echo = F, warning = F, message = F}
+message('constant columns')
+message(col)
+```
+
+```{r, echo=FALSE}
+if (col[1] == 0){
+  firstchunk <- 'There are no constant columns in the dataset.'
+}
+
+if (col[1] == 1){
+  firstchunk <- 'We have one column that is constant. We remove it in order to avoid distortion of the results.'
+  data <- data[,apply(data, 2, var, na.rm=TRUE) != 0]
+}
+
+if (col[1] > 1){
+  firstchunk <- paste('We have ', length(col), ' columns that are constant. They need to be removed in order to avoid distortion of the results.' , sep = '')
+  data <- data[,apply(data, 2, var, na.rm=TRUE) != 0]
+}
+
+```
+
+`r firstchunk`
+
+**First Exploration:**
+
+Before anything, be would like to see what our data looks like. We perform **Principal Components Analysis** in order to visualize it in 2D. We colour the points by the type of server.
+
+```{r, echo=FALSE}
+dataready <- data
+pca <- prcomp(dataready, scale = TRUE)
+```
+
+```{r aqui, echo = F, warning = F, message = F}
+
+message('pca')
+message(pca$x)
+message(length(pca$x))
+```
+
+```{r, echo=FALSE}
+
+PC1 <- pca$x[,1]
+PC2 <- pca$x[,2]
+
+tot <- cbind.data.frame(PC1, PC2)
+ggplot(tot,
+  aes(x = PC1, y = PC2)) + geom_point() + theme(legend.position="none", plot.title = element_text(hjust = 0.5)) + labs(title = 'PCA on the servers activity')
+
+```
+
+We can see that the activity that comes from same (or similar) servers is plotted together. We will proceed now to the clustering. 
+
+
+#K-Means
+
+The K-means algorithm is one of the most popular iterative descent clustering methods. It is intended for situations in which all variables are of the quantitative type and squared Euclidean distance is chosen as the dissimilarity measure. The only parameter is the number of clusters $k$. We will explore three methods to choose it.
+
+##The Elbow Method
+
+The Elbow method chooses the optimal number of clusters, $k^{*}$, by iterating from 1 to the $k_{max}$ defined. For each $k$, we calculate the **total within-cluter sum of squares** and we plot the curve of the **wss**. Here we set $k_{max} = 15$.
+
+The location of a bend (an elbow) in the plot is an indicator of the appropriate number of clusters. Let's try it on our data.
+
+```{r, echo=FALSE}
+data_scaled <- scale(dataready, center = TRUE, scale = TRUE)
+
+k.max <- 15 # Maximal number of clusters
+data <- data_scaled
+wss <- sapply(1:k.max, 
+              function(k){kmeans(data, k, nstart=10 )$tot.withinss})
+
+plot(1:k.max, wss,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares")
+abline(v = 2, lty =2)
+
+```
+
+The value of $k^{*}$ is not totally clear from the plot above. We would like to choose something like 2 or 3.  
+
+**Warning:** We perform the k-means on all the dimensions available and afterwards we plot it in 2D. This reduction of dimensions means that we loose information (we cannot explain all the variance with only 2 dimensions). As a consequence, some clusters might overlap, but as I said this is normal because when taking into account all the variables, the clusters that in 2D are overlapping, should be well differentiated.
+
+Let's see how the k-means would perform with each value.
+
+```{r, echo=FALSE}
+#with 77 no overlapping
+#set.seed(77)
+
+set.seed(10)
+autoplot(kmeans(data_scaled, 2), data = data_scaled, frame = TRUE)
+autoplot(kmeans(data_scaled, 3), data = data_scaled, frame = TRUE)
+
+```
+
+We see some overlapping points when choosing 3 clusters. In general, both results are satisfactory.
+
+##The Average Silhouette Method
+
+This method describes the quality of a clustering as it determines how well each point lies within its cluster. 
+
+The Average Silhouette Method computes the average silhouette of observations for every $k$ between 1 and $k_{max}$. The optimal number of clusters $k^{*}$ is the one that maximize the average silhouette. Here we set $k_{max} = 15$.
+
+We start by plotting the results for each possible $k$.
+
+```{r, echo=FALSE}
+library(cluster)
+k.max <- 15
+data <- data_scaled
+sil <- rep(0, k.max)
+
+# Compute the average silhouette width for 
+# k = 2 to k = 15
+for(i in 2:k.max){
+  km.res <- kmeans(data, centers = i, nstart = 25)
+  ss <- silhouette(km.res$cluster, dist(data))
+  sil[i] <- mean(ss[, 3])
+}
+
+plot(1:k.max, sil, type = "b", pch = 19, 
+     frame = FALSE, xlab = "Number of clusters k")
+abline(v = which.max(sil), lty = 2)
+
+```
+
+2 clusters are suggested by the Average Silhouette Method.
+
+##The Gap Statistic
+
+The gap statistic compares the **total within-cluter sum of squares** for different values of $k$ with their expected values under null reference distribution of the data (which is a distribution with no obvious clustering). The null reference dataset is generated using Monte Carlo simulations. For each feature, we use a uniform distribution between the its minimum and maximum value to generate a sample. We don't generate just one but a certain number $B$ via bootstrapping, this allows us to generalize.
+
+Roughly speaking, we choose the value of $k$ that has a clustering structure far away from the uniform clustering. More information on the construction of the Gap Statistic can be found in the article by Tibshirani, Walther and Hastie forementioned in the References. 
+
+We proceed using the **clusGap()** function and choosing $k_{max} = 15$ and $B = 10$.
+
+The results are displayed below, the method for choosing $k^{*}$ is the one proposed in the article.
+
+
+```{r, echo=FALSE, warning=FALSE, eval=FALSE}
+data <- data_scaled
+gap_stat <- clusGap(data, FUN = kmeans, K.max = 15, B = 10)
+print(gap_stat, method = "Tibs2001SEmax")
+#plot(gap_stat)
+```
+
+In our case, the algorithm suggests $k^{*} = 4$.
+
+#Hierarchical Clustering
+
+As the name suggests, this algorithm seeks to build a hierarchy of clusters. It is required that the user specifies a measure of dissimilarity between observations. At each level of the hierarchy, the clusters are created by merging clusters at the next lower level. Two paradigms are possible: *agglomerative* (bottom-up) or *divisive* (top-down). The results of this algorithm are presented in the form of a tree called dendogram. 
+
+Here the dissimilarity measure will be the Euclidean distance and the method chosen is the **Ward Method**. 
+
+We start by calculating the dendogram in order to see if a natural $k^{*}$ can be discerned. 
+
+```{r, echo=FALSE}
+# Compute pairewise distance matrices
+dist.res <- dist(data_scaled, method = "euclidean")
+# Hierarchical clustering results
+hc <- hclust(dist.res, method = "ward.D")
+# Visualization of hclust
+plot(hc, labels = FALSE, hang = -1, xlab="", sub="")
+```
+
+
+From now on, we will just present the raw results for finding the best $k$, as a small explanation of the three used techniques has already been given in the previous section.
+
+##The Elbow Method
+
+```{r, echo=FALSE}
+fviz_nbclust(data_scaled, hcut, method = "wss", hc_method = 'ward.D') +
+  geom_vline(xintercept = 2, linetype = 2)
+```
+
+The number of clusters chosen by the Elbow Method is equal to 2. Let's see our dendogram with $k^{*} = 2$.
+
+```{r, echo = FALSE}
+plot(hc, labels = FALSE, hang = -1 , xlab="", sub="")
+rect.hclust(hc, k = 2, border = 2:4) 
+```
+
+##The Average Silhouette Method
+
+```{r, echo=FALSE}
+fviz_nbclust(data_scaled, hcut, method = "silhouette",
+             hc_method = "ward.D")
+```
+
+The number of clusters chosen by the Average Silhouette Method is also equal to 2. The dendogram is identical to the previous one.
+
+```{r, echo = FALSE, eval=FALSE}
+# Let's see our dendogram with $k^{*} = 2$.
+plot(hc, labels = FALSE, hang = -1, xlab="", sub="")
+rect.hclust(hc, k = 3, border = 2:3) 
+```
+
+##The GAP Statistic
+
+```{r, echo=FALSE, eval = FALSE}
+fviz_nbclust(data_scaled, hcut, method = "gap_stat",  hc_method = 'ward.D', nboot = 10)
+```
+
+The results provided by this method are not satisfactory. We might be making a mistake somewhere. The method, here the Ward Method, might not be well suited...
+
+#DBSCAN
+
+Unlike the two previous algorithms, the **Density-based clustering of application with noise (DBSCAN)** does not require the user to specify the number of clusters. On the contrary, it has two parameters $\epsilon$ and $minPoints$. As this is a density algorithm, the $minPoints$ parameter controls the minimum number of points required to form a dense region. The $\epsilon$ parameter controls the radius of the neighborhood of a point. Moreover, it doesn't necessarily put each observation in a cluster, outliers are permitted. Roughly, the idea behind the *density* part is that if a particular point belongs to a cluster, it should be near to lots of other points in that cluster. 
+
+In addition to not having to choose $k$, this algorithm has quite a few more advantages: it is robust to outliers and can also find arbitrarily shaped clusters. That is the reason why it is studied in this report. 
+
+More information about this algorithm can be found in the article provided in the references.
+
+We will start by determining the optimal $\epsilon$ value. We set a fixed value for $minPoints$ and we compute the $minPoints$-nearest neighbor distance for each point, so we end up with a matrix of (n x $minPoints$) dimensions. Next, this distances are plotted in an ascending order and the aim is to determine the knee which corresponds to the optimal $epsilon$ parameter. We plot this with $minPoints = 5$.
+
+```{r, echo = FALSE}
+kNNdistplot(data_scaled, k =  5)
+abline(h = 5, lty = 2)
+```
+
+From the plot above it can be seen that the optimal $\epsilon$ is around 5.
+
+Now let's execute the DBSCAN algorithm in our data and we will use the PCA to display visually our results in 2D.
+
+```{r, echo = FALSE}
+res.fpc <- fpc::dbscan(data_scaled, eps = 5, MinPts = 5)
+fviz_cluster(res.fpc, data_scaled, geom = "point") + theme(plot.title = element_text(hjust = 0.5)) + labs(title = 'DBSCAN on the servers activity')
+```
+
+
+What we see here is that DBSCAN organizes the data into 5 clusters. Two clusters contain almost all the data. There are 3 other clusters that contain very few points and finally some outliers. When changing empirically the $minPoints$ parameter, we see that the two big cluster remain constant.
+
+#Conclusion
+
+After this work, if we can conclude something about this matter is that it is not an easy question! Neither the selection of the algorithm for the clustering nor the parameters of the given algorithm are obvious. 
+
+In spite of that, we obtained some results that match. Both with K-means and Hierarchical Clustering, we obtained **two clusters** with both the Elbow and Silhouette Methods. Thoses results are corroborated by the DBSCAN algorithm that puts most of our data into two clusters.
+
+On the other hand, the Gap Statistic provides different results: 4 clusters for the K-means algorithm and a very odd result for the Hierarchical Clustering (we might be making a mistake here!).
+
+As a final conclusion, we will keep $k^{*} = 2$.
+
+#References
+
+**The Gap Statistic:**
+
+Tibshirani, R., Walther, G. and Hastie, T. (2001). Estimating the number of data clusters via the Gap statistic. Journal of the Royal Statistical Society B, 63, 411–423
+
+The complete method for hierarchical clustering:
+https://en.wikipedia.org/wiki/Complete-linkage_clustering
+
+**The DBSCAN:**
+
+Definition:
+Ester, M., Kriegel, H., Sander, J. and Xu X. (1996). A density-based algorithm for discovering clusters in large spatial databases with noise.
+
+Nice visualizations:
+https://www.naftaliharris.com/blog/visualizing-dbscan-clustering/
+
+Single linkage method:
+https://www.stat.cmu.edu/~cshalizi/350/lectures/08/lecture-08.pdf

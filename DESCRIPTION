@@ -1,0 +1,24 @@
+Package: stanopencpu 
+Type: Package
+Title: OpenCPU service to render Stan .Rmd remotely 
+Version: 0.1.0
+Author: Manuel Martín de Miguel, Ines Añibarro Gorostiza
+Maintainer: Manuel Martín de Miguel <manuel.martin@devo.com>, Inés Añibarro Gorostiza <ines.anibarro@devo.com>
+Description: Uses the rmarkdown package to render the stan.Rmd R Markdown notebook with a provided dataframe. 
+License: DEVO 
+Encoding: UTF-8
+LazyData: true
+NeedsCompilation: no
+Packaged: 2018-11-29 15:01:08 UTC; opencpu
+Imports:
+	knitr,
+	rmarkdown,
+	fBasics,
+	fUnitRoots,
+	forecast,
+	nnet,
+	ggfortify,
+	cluster,
+	EMCluster,
+	dbscan,
+	factoextra
