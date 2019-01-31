@@ -1,4 +1,6 @@
 
+## This project is an experiment and it's not production ready yet.
+
 ### stan-opencpu
 
 This folder contains a small R package that can be installed inside an OpenCPU server.
