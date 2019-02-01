@@ -1,4 +1,4 @@
-Package: stanopencpu 
+Package: stan
 Type: Package
 Title: OpenCPU service to render Stan .Rmd remotely 
 Version: 0.1.0
