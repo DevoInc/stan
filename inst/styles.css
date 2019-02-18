@@ -43,10 +43,11 @@
 }
 html {
   font-size: 0.625rem;
-  color: #7c7c7c;
 }
 body {
   font-size: 1.4rem;
+  color: #7c7c7c;
+  padding: 0 3rem;
 }
 body,
 input,
@@ -58,4 +59,22 @@ button {
 h1,h2,h3,h4,h5,h6 {
   font-weight: 700;
   color: #292929;
+}
+h1 { 
+  font-size: 30px;
+}
+h2 { 
+  font-size: 26px;
+}
+h3 { 
+  font-size: 22px;
+}
+h4 { 
+  font-size: 18px;
+}
+h5 { 
+  font-size: 15px;
+}
+h6 { 
+  font-size: 13px;
 }
