@@ -5,7 +5,7 @@ output:
   html_document:
     theme: default
     highlight: null
-    css: styles.css
+    css: assets/css/styles.css
 params:
   test: 'default'
 ---
