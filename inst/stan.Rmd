@@ -3,8 +3,7 @@ title: "The Statistical Android"
 author: "Inésita Añíbarro Gorostiza"
 date: "October 2018"
 output: 
-  html_document:
-    css: styles.css
+  html_document
 params:
   test: 'default'
 ---
