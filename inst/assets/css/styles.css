@@ -1,3 +1,58 @@
-.main-container {
-  margin-top: 600px !important;
+
+@font-face {
+  font-family: 'Devo Font';
+  src: url('../fonts/MuseoSansBold.eot');
+  src: url('../fonts/MuseoSansBold.woff') format('woff'),
+  url('../fonts/MuseoSansBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Devo Font';
+  src: url('../fonts/MuseoSansBlack.eot');
+  src: url('../fonts/MuseoSansBlack.woff') format('woff'),
+  url('../fonts/MuseoSansBlack.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Devo Font';
+  src: url('../fonts/MuseoSansMedium.eot');
+  src: url('../fonts/MuseoSansMedium.woff') format('woff'),
+  url('../fonts/MuseoSansMedium.ttf') format('truetype');
+  font-weight: normal; // 500, 400
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Devo Font';
+  src: url('../fonts/MuseoSansRegular.eot');
+  src: url('../fonts/MuseoSansRegular.woff') format('woff'),
+  url('../fonts/MuseoSansRegular.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Devo Font';
+  src: url('../fonts/MuseoSansLight.woff') format('woff'),
+       url('../fonts/MuseoSansLight.woff2') format('woff2');
+  font-weight: 100;
+  font-style: normal;
+}
+
+html {
+  font-size: 0.625rem;
+}
+body {
+  font-size: 1.6rem;
+}
+body,
+input,
+textarea,
+select,
+button {
+  font-family: 'Devo Font', sans-serif;
 }
