@@ -43,9 +43,10 @@
 }
 html {
   font-size: 0.625rem;
+  color: #7c7c7c;
 }
 body {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
 }
 body,
 input,
@@ -53,4 +54,8 @@ textarea,
 select,
 button {
   font-family: 'Devo Font', sans-serif;
+}
+h1,h2,h3,h4,h5,h6 {
+  font-weight: 700;
+  color: #292929;
 }
