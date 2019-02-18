@@ -1,8 +1,10 @@
 ---
 title: "The Statistical Android"
-author: "Inés Añíbarro Gorostiza"
+author: "Inésita Añíbarro Gorostiza"
 date: "October 2018"
-output: pdf_document
+output: 
+  html_document:
+    css: styles.css
 params:
   test: 'default'
 ---
