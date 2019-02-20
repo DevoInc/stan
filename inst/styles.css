@@ -127,3 +127,11 @@ img {
     text-transform: uppercase;
     margin-bottom: 3rem;
 }
+ 
+/* Math Jax */
+.mn {
+  font-size: 1.6rem;
+  color: #7c7c7c;
+  position: relative;
+}
+
