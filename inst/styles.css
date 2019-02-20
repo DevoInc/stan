@@ -47,7 +47,7 @@ html {
 body {
   font-size: 1.4rem;
   color: #7c7c7c;
-  padding: 0 3rem;
+  padding: 0 3rem 3rem 3rem;
 }
 body,
 input,
@@ -89,6 +89,14 @@ strong {
 img {
   margin: 0 auto;
   display: block;
+}
+/* sections _______________________________________ */
+
+.section + .section{
+  margin-top: 4rem;
+}
+.section > h3 {
+  margin-bottom: 2rem;
 }
 
 /* header _______________________________________ */
