@@ -126,14 +126,15 @@ img {
 /* first h1 _______________________________________ */
 
 .section.level1 > h1 {
-    font-size: 15px;
-    color: #9fb214;
-    margin: 0;
-    font-weight: normal;
-    padding: 0 0px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    margin-bottom: 3rem;
+  font-size: 15px;
+  color: #9fb214;
+  font-weight: normal;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin: 0 -15px 3rem -15px;
+  padding: 10px 15px;
+  border-bottom: solid 1px #ccc;
+  border-top: solid 1px #ccc;
 }
  
 /* Math Jax */
