@@ -130,6 +130,7 @@ img {
  
 /* Math Jax */
 .mn {
+  font-family: 'Devo Font', sans-serif !important;
   font-size: 1.6rem;
   color: #7c7c7c;
   position: relative;
