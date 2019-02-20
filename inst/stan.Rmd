@@ -6,7 +6,6 @@ output:
     theme: default
     highlight: null
     css: styles.css
-mainfont: Arial
 params:
   test: 'default'
 ---
