@@ -121,7 +121,7 @@ message('length')
 message(length(ts))
 ```
 
-#Time series to evaluate: `r name`
+#Time series to evaluate: <strong>`r name`</strong>
 
 ### 1) Descriptive Analysis, Missing Values and Normalization
 
