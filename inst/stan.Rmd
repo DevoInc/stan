@@ -161,7 +161,7 @@ mean_ts <- mean(ts)
 
 `r if (constant == FALSE){chunki}`
 
-We will normalize the series in order to have all values between $0$ and $1$. This will be useful when comparing it with other time series that have different units. We display the plot of the normalized series.
+We will normalize the series in order to have all values between 0 and 1. This will be useful when comparing it with other time series that have different units. We display the plot of the normalized series.
 
 ```{r, echo = FALSE}
 ts <- (ts - min_ts)/(max_ts - min_ts)
