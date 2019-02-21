@@ -120,7 +120,7 @@ message('length')
 message(length(ts))
 ```
 <div class="fluid-row" id="headerTitle">
-<h1 class="title toc-ignore">Time series to evaluate: <strong>`r name`</strong></h1>
+  <h1 class="title toc-ignore">Time series <strong>`r name`</strong></h1>
 </div>
 
 ### 1) Descriptive Analysis, Missing Values and Normalization
