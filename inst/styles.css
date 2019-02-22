@@ -92,6 +92,11 @@ img {
   margin: 0 auto;
   display: block;
 }
+.main-container {
+    max-width: 595px;
+    padding: 0 35px 30px 35px;
+}
+
 /* sections _______________________________________ */
 
 .section + .section{
