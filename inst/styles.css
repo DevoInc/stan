@@ -173,10 +173,9 @@ img {
     background-color: red;
     font-size: 40px;
   }
- 
- h1.title::before { 
-   content: counter(page) ' / '; 
-   }
+  h1.title::before { 
+    content: counter(page) ' / '; 
+  }
   
   /* Defining all page breaks */
   a {
