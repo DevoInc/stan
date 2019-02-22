@@ -61,22 +61,22 @@ h1,h2,h3,h4,h5,h6 {
   color: #292929;
 }
 h1 { 
-  font-size: 26px;
+  font-size: 24px;
 }
 h2 { 
-  font-size: 23px;
+  font-size: 21px;
 }
 h3 { 
-  font-size: 20px;
+  font-size: 18px;
 }
 h4 { 
-  font-size: 17px;
+  font-size: 16px;
 }
 h5 { 
-  font-size: 14px;
+  font-size: 15px;
 }
 h6 { 
-  font-size: 13px;
+  font-size: 14px;
 }
 p {
   font-size: 16px;
@@ -118,7 +118,7 @@ img {
   left: 0;
   bottom: -1px;
   height: 3px;
-  width: 100px;
+  width: 205px;
   background: #9fb214;
   display: block;
   position: absolute;
@@ -129,10 +129,19 @@ img {
   justify-content: space-between;
   font-weight: 100;
   margin: 0;
-  font-size: 36px;
+  font-size: 34px;
 }
 #headerTitle h1 strong {
   color: #9fb214;
+  font-size: 26px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#headerTitle h1 span {
+    flex-shrink: 0;
+    padding-right: 5rem;
 }
 
 /* Math Jax _________________________________________ */
