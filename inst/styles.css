@@ -164,12 +164,15 @@ img {
     size: auto;
     margin: 10%;
   }
- @top-left {
-   content: element(heading); 
-   }
+  @top {
+    content: element(header);
+    font-family: 'Devo Font', sans-serif !important;
+    font-size: 12pt;
+    backgorund: red;
+  }
    
  h1.title { 
-   position: running(heading); 
+   position: running(header); 
    }
  
  h1.title::before { 
