@@ -166,17 +166,20 @@ img {
   @page {
     size: auto;
     margin: 10%;
-    @top-left {
-      content: element(header);
+    @top {
+      content: 'The header of the page';
     } 
   }
   .print-header { 
     top: 0;
     color: green;
     display: block;
-    position: running(header); 
+    position: fixed; 
+    top: 0;
+    width: 100%;
     font-family: 'Devo Font', sans-serif !important;
-    background-color: red;
+    background-color: red !important;
+    color: #fff;
     font-size: 40px;
   }
   .print-header h1.title::before { 
