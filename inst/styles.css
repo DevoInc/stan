@@ -165,25 +165,7 @@ img {
 @media print {
   @page {
     size: auto;
-    margin: 10%;
-    @top {
-      content: 'The header of the page';
-    } 
-  }
-  .print-header { 
-    top: 0;
-    color: green;
-    display: block;
-    position: fixed; 
-    top: 0;
-    width: 100%;
-    font-family: 'Devo Font', sans-serif !important;
-    background-color: red !important;
-    color: #fff;
-    font-size: 40px;
-  }
-  .print-header h1.title::before { 
-    content: counter(page) ' / '; 
+    margin: 5% 10%;
   }
   
   /* Defining all page breaks */
