@@ -108,6 +108,9 @@ img {
 
 /* header _______________________________________ */
 
+.print-header {
+  display: none;
+}
 #header {
   display: none;
 }
@@ -163,17 +166,18 @@ img {
   @page {
     size: auto;
     margin: 10%;
+    @top {
+      content: element(header);
+    } 
   }
-  @top {
-    content: element(header);
-  } 
   .print-header { 
+    display: block;
     position: running(header); 
     font-family: 'Devo Font', sans-serif !important;
     background-color: red;
     font-size: 40px;
   }
-  h1.title::before { 
+  .print-header h1.title::before { 
     content: counter(page) ' / '; 
   }
   
@@ -202,5 +206,3 @@ img {
     page-break-before:avoid
   }
 }
-
-
