@@ -166,14 +166,13 @@ img {
   }
   @top {
     content: element(header);
+  } 
+  .print-header { 
+    position: running(header); 
     font-family: 'Devo Font', sans-serif !important;
-    font-size: 12pt;
-    backgorund: red;
+    background-color: red;
+    font-size: 40px;
   }
-   
- h1.title { 
-   position: running(header); 
-   }
  
  h1.title::before { 
    content: counter(page) ' / '; 
