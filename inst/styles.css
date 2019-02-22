@@ -171,6 +171,8 @@ img {
     } 
   }
   .print-header { 
+    top: 0;
+    color: green;
     display: block;
     position: running(header); 
     font-family: 'Devo Font', sans-serif !important;
