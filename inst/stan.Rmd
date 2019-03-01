@@ -44,7 +44,7 @@ data <- params$test
 
 ```{r, echo = F, warning = F, message = F}
 message('data')
-message(data[,2])
+#message(data[,2])
 message(colnames(data))
 ```
 
@@ -55,8 +55,12 @@ constant <- (length(unique(na.omit(data[,2]))) == 1)
 #period set to 1, to avoid duplication of eval arguments in the chunks
 if (constant){
   period <- 1
+  periodCorrelation <- 1
   pValue <- 0
   typ <- 'null'
+  acf <- 0
+  nullPresence <- FALSE
+  negativePresence <-FALSE
 }
 ```
 
@@ -73,10 +77,9 @@ message(acf)
 ```
 
 
-
-```{r, echo = FALSE, eval = (constant == FALSE)}
+```{r, echo = FALSE}
 findingLocalMax <- function (acf){
-  localMax <- NULL
+  localMax <- -1
   for (i in 2:(length(acf) - 1)){
     previous <- acf[i -1]
     current <- acf[i]
@@ -89,16 +92,12 @@ findingLocalMax <- function (acf){
   }  
   return (localMax)
 }
+```
 
+```{r, echo = FALSE, eval = (constant == FALSE)}
 periodCorrelation <- findingLocalMax(acf)
 
 period <- findfrequency(data[,2])
-```
-
-
-```{r, echo = F, warning = F, message = F}
-message('period')
-message(period)
 ```
 
 
@@ -108,20 +107,17 @@ name <- colnames(data)[2]
 ```
 
 
-
 ```{r, echo = F, warning = F, message = F}
+message('periodCorr')
+message(periodCorrelation)
+
 message('period')
 message(period)
-
-message('ts')
-message(ts)
-
-message('length')
-message(length(ts))
 ```
+
 <div class="fluid-row" id="headerTitle"><h1 class="title toc-ignore"><span>Time series </span><strong>`r name`</strong></h1></div>
 
-### 1) Descriptive Analysis, Missing Values and Normalization
+### 1) Descriptive Analysis and Missing Values 
 
 This time series represents the evolution of the number of `r name`. 
 
@@ -129,14 +125,14 @@ This time series represents the evolution of the number of `r name`.
 plot(ts, ylab = name)
 ```
 
-
 It contains `r length(ts)` observations, going from `r as.POSIXct(data[1,1]/1000, origin="1970-01-01")` to `r as.POSIXct(data[length(data[,1]),1]/1000, origin="1970-01-01")`. 
 
 ```{r, echo = FALSE, eval = (constant == TRUE)}
 const <- unique(na.omit(data[,2]))
+my_lag <- 1
 ```
 
-`r if(constant == TRUE){paste('The values of the time series are constant, all of them are equal to ', unique(na.omit(data[,2])), '. Unfortunately, a constant series cannot be analyzed much more and so we end up the report here.', separator = '')}`
+`r if(constant == TRUE){paste0('The values of the time series are constant, all of them are equal to ', unique(na.omit(data[,2])), '. A constant series cannot be analyzed much more and so we end up the report here.')}`
 
 ```{r, echo = FALSE, eval = (constant == FALSE)}
 nas <- sum(is.na(ts))
@@ -151,21 +147,21 @@ if (nas != 0){
   ts <- na.approx(ts, rule = 2)
 }
 
-min_ts <- min(ts)
-max_ts <- max(ts)
-mean_ts <- mean(ts)
+min_ts <- round(min(ts), 3)
+max_ts <- round(max(ts), 3)
+mean_ts <- round(mean(ts), 3)
 ```
 
-`r if (constant == FALSE){paste('The time series contains values between ', min_ts, ' and ', max_ts, ' with a mean of ', round(mean_ts,3), '.', separator = '')}`
+`r if (constant == FALSE){paste0('The time series contains values between ', min_ts, ' and ', max_ts, ' with a mean of ', round(mean_ts,3), '.', separator = '')}`
 
 `r if (constant == FALSE){chunki}`
 
-We will normalize the series in order to have all values between 0 and 1. This will be useful when comparing it with other time series that have different units. We display the plot of the normalized series.
+<!-- `r if (constant == FALSE){'We will normalize the series in order to have all values between 0 and 1. This will be useful when comparing it with other time series that have different units. We display the plot of the normalized series.'}` -->
 
-```{r, echo = FALSE}
-ts <- (ts - min_ts)/(max_ts - min_ts)
-plot(ts, ylab = name)
-```
+<!-- ```{r, echo = FALSE, eval = (constant == FALSE)} -->
+<!-- ts2 <- (ts - min_ts)/(max_ts - min_ts) -->
+<!-- plot(ts2, ylab = name) -->
+<!-- ``` -->
 
 
 `r if (constant == FALSE){'### 2) Computing the period length'}`
@@ -191,6 +187,8 @@ We display here the calculated coefficients:
 pValue = 0
 typ = 'null'
 nullPresence <- FALSE
+negativePresence <- FALSE
+my_lag <- 1
 ```
 
 `r if(constant == FALSE) {chunk2}`
@@ -199,11 +197,11 @@ nullPresence <- FALSE
 plot(acf(ts, plot = FALSE), main = 'Autocorrelation with lagged versions')
 ```
 
-```{r, echo=FALSE, eval=(period!=1 & findingLocalMax(acf) != NULL)}
-chunk2bis <- paste('By looking for a local maximum, we obtain a period of length ', findingLocalMax(acf), sep = '')
+```{r, echo=FALSE, eval= (period!=1 & periodCorrelation != -1 )}
+chunk2bis <- paste('By looking for a local maximum, we obtain a period of length ', periodCorrelation, '.', sep = '')
 ```
 
-```{r, echo=FALSE, eval=(period!=1 & findingLocalMax(acf) == NULL)}
+```{r, echo=FALSE, eval=(period!=1 & constant == FALSE & periodCorrelation == -1)}
 chunk2bis <- paste('By looking at the plot we are not able to detect a local maximum so we cannot use this method.')
 ```
 
@@ -235,23 +233,24 @@ We display the plot:'
 
 res <- adfTest(ts, lags = 0, type = "nc")
 pValue <- res@test$p.value
+my_lag <- ndiffs(ts)
 
 testResult <- function (pValue){
 
   if (pValue < 0.05){
-    return(paste('We use the **Dickey-Fuller** test in order to test the null hypothesis H0: ‘The series contains a unit root’ (i.e. is
-not stationary). At a 0.05% level of confidence, the p-value (', round(pValue,3), ') is small and thus we have enough evidence to reject the null hypothesis and conclude that the series is indeed **stationary**. '));
+    return(paste0('We use the **Dickey-Fuller** test in order to test the null hypothesis H0: ‘The series contains a unit root’ (i.e. is
+not stationary). At a 0.05% level of confidence, the p-value (', round(pValue,3), ') is small and thus we have enough evidence to reject the null hypothesis and conclude that the series is indeed **stationary**.'));
   }
 
   else{
-    return(paste('We use the **Dickey-Fuller** test in order to test the null hypothesis H0: ‘The series contains a unit root’ (i.e. is
+    return(paste0('We use the **Dickey-Fuller** test in order to test the null hypothesis H0: ‘The series contains a unit root’ (i.e. is
 not stationary). At a 0.05% level of confidence, the p-value (', round(pValue,3), ') is bigger enough to say that we fail to reject the null hypothesis and we conclude that the series is **not stationary**.'));
   }
 }
 
 differentiating <- function(pValue){
     if (pValue < 0.05){
-      return ('The is no need to differentiate our series.')
+      return ('The is no need to differentiate our series. Subsequently, if an ARIMA(p,d,q) model is fitted, the d parameter that stands for the degree of differenciating will be equal to 0.')
     }
   else{
     return ('We want to check how many differentiations we need to perform in order to make it stationary.
@@ -272,12 +271,13 @@ message(ndiffs(ts))
 
 
 ```{r, echo=FALSE, eval=(period!=1 & pValue >= 0.05)}
-lag <- ndiffs(ts)
-if(lag == 0){lag = lag + 1}
-plot(diff(ts, lag = lag), main = paste('Differentiation at lag = ', lag))
+if(my_lag == 0){my_lag = my_lag + 1}
+plot(diff(ts, lag = my_lag), main = paste('Differentiation at lag = ', my_lag))
 ```
 
-`r if(period !=1 & pValue >= 0.05) {paste('After ', lag, ' differenciations, we can say that the series is already stationary.')}`
+`r if(period !=1 & pValue >= 0.05 & my_lag == 1) {paste0('After ', my_lag, ' differenciation, we can say that the series is already stationary. Subsequently, if an ARIMA(p,d,q) model is fitted, the d parameter that stands for the degree of differenciating will be equal to ', my_lag, '.')}`
+
+`r if(period !=1 & pValue >= 0.05 & my_lag != 1) {paste0('After ', my_lag, ' differenciations, we can say that the series is already stationary. Subsequently, if an ARIMA(p,d,q) model is fitted, the d parameter that stands for the degree of differenciating will be equal to ', my_lag, '.')}`
 
 `r if(period !=1) {'### 4) Decomposing the series'}`
 
@@ -285,22 +285,40 @@ plot(diff(ts, lag = lag), main = paste('Differentiation at lag = ', lag))
 #warning: null points are not allowed in the series as the estimation of the trend when using multiplicative type divides by 0. At first, we tried adding 0.00001 to the null values of the series. This idea distorted the result for the confidence intervals and had to be discarded. Finally, we decide to force the additive model on those cases.
 
 nullPresence <- FALSE
+negativePresence <- FALSE
 
 if (0 %in% ts){
   acfAdd <- 0
   acfMult <- 0
   nullPresence <- TRUE
 }
+
+if (sum(ts < 0) != 0){
+  acfAdd <- 0
+  acfMult <- 0
+  negativePresence <- TRUE
+}
 ```
 
-`r if(period !=1 & nullPresence == FALSE) {'In order to know the type of series we are dealing with, we make two decompositions: one with the additive assumption and one with the multiplicative one. This is done in order to check how much correlation between data points is still encoded within the residuals. We would like to choose the model with the lesser amount of autocorrelation in the residuals. This will mean that the chosen model encapsulates as much information as possible.'}`
+`r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {'In order to know the type of series we are dealing with, we make two decompositions: one with the additive assumption and one with the multiplicative one. This is done in order to check how much correlation between data points is still encoded within the residuals. We would like to choose the model with the lesser amount of autocorrelation in the residuals. This will mean that the chosen model encapsulates as much information as possible.'}`
 
-`r if(period !=1 & nullPresence == TRUE){'The time series we are studying contains values that are equal to 0. This means that a multiplicative model is not possible. The reason behind this is because in a multiplicative model the trend is calculated as division of two data points and thus a zero value is forbidden. Instead the **additive model** uses the substraction of data points and so it is used in this case.'}`
+```{r, echo = F, warning = F, message = F}
+message('nullPresence')
+message(nullPresence)
+message('negativePresence')
+message(negativePresence)
+```
 
-`r if(period !=1 & nullPresence == FALSE) {'We take a look at the respective autocorrelations:'}`
+`r if(period !=1 & nullPresence == TRUE & negativePresence == FALSE){'The time series we are studying contains values that are equal to 0. This means that a multiplicative model is not possible. The reason behind this is because in a multiplicative model the trend is calculated as division of two data points and thus a zero value is forbidden. Instead the **additive model** uses the substraction of data points and so it is used in this case.'}`
+
+`r if(period !=1 & negativePresence == TRUE & nullPresence == FALSE){'The time series we are studying contains values that are negative. Thus, it makes more sense to use an **additive model**.'}`
+
+`r if(period !=1 & negativePresence == TRUE & nullPresence == TRUE){'The time series we are studying contains values that are equal to 0 and also values that are below zero. This means that a multiplicative model is not possible. The reason behind this is because in a multiplicative model the trend is calculated as division of two data points and thus a zero value is forbidden. Instead the **additive model** uses the substraction of data points and so it is used in this case.'}`
+
+`r if(period !=1 & nullPresence == FALSE & negativePresence == FALSE) {'We take a look at the respective autocorrelations:'}`
 
 
-```{r, echo=FALSE, eval=(period!=1 & nullPresence == FALSE)}
+```{r, echo=FALSE, eval=(period!=1 & nullPresence == FALSE & negativePresence == FALSE)}
 randomAdd <- na.approx(decompose(ts, type = "additive")$random, rule = 2)
 randomMult <- na.approx(decompose(ts, type = "multiplicative")$random, rule = 2)
 
@@ -308,31 +326,33 @@ plot(acf(randomAdd, plot = FALSE), main ='Autocorrelation on the additive residu
 plot(acf(randomMult, plot = FALSE), main = 'Autocorrelation on the multiplicative residuals')
 ```
 
-```{r, echo=FALSE, eval=(period!=1 & nullPresence == FALSE)}
+```{r, echo=FALSE, eval=(period!=1 & nullPresence == FALSE & negativePresence == FALSE)}
 acfAdd <- sum(acf(randomAdd, plot = FALSE)$acf^2)
 acfMult <- sum(acf(randomMult, plot = FALSE)$acf^2)
 ```
 
 ```{r, echo=FALSE, eval=(period!=1)}
+difference <- 0.01
+
 addOrMult <- function(addCoeff, multCoeff){
-  if (abs(addCoeff-multCoeff) <=  0.002){
-    res = paste('In this case both auto-correlation coefficients are very **similar**. We obtained ', round(addCoeff,3), 'for the additive and ', round(multCoeff,3), 'in the multiplicative case. We are not in a position to choose one which is clearly better than the other one. We continue this report displaying solutions for both of the decompositions and we let the user choose which one suits the problem best.' )
+  if ((abs(addCoeff-multCoeff) <=  difference) & (nullPresence == FALSE) & (negativePresence == FALSE)){
+    res = paste0('In this case both autocorrelation coefficients are very **similar**. We obtained ', round(addCoeff,3), ' for the additive and ', round(multCoeff,3), ' in the multiplicative case. We are not in a position to choose one which is clearly better than the other one. We continue this report displaying solutions for both of the decompositions and we let the user choose which one suits the problem best.' )
   }
   
   else{
     if (addCoeff < multCoeff){
-    res = paste('In this case the auto-correlation coefficient of the additive model (',round(addCoeff,3), ') is lesser than the multiplicative (',round(multCoeff,3),') so we conclude that fitting an **additive model** is more accurate.')
+    res = paste0('In this case the autocorrelation coefficient of the additive model (',round(addCoeff,3), ') is lesser than the multiplicative (',round(multCoeff,3),') so we conclude that fitting an **additive model** is more accurate.')
     }
 
     else{
-    res = paste('In this case the auto-correlation coefficient of the multiplicative model (',round(multCoeff,3),') is lesser than      the additive (',round(addCoeff,3),') so we conclude that fitting a **multiplicative model** is more accurate.');
+    res = paste0('In this case the autocorrelation coefficient of the multiplicative model (',round(multCoeff,3),') is lesser than      the additive (',round(addCoeff,3),') so we conclude that fitting a **multiplicative model** is more accurate.');
     }
   }
   return (res)
 }
 
 type <- function(addCoeff, multCoeff){
-  if (abs(addCoeff-multCoeff) <=  0.002){
+  if ((abs(addCoeff - multCoeff) <=  difference) & (nullPresence == FALSE) & (negativePresence == FALSE)){
     return('both')
   }
   else{
@@ -349,16 +369,14 @@ type <- function(addCoeff, multCoeff){
 typ <- type(acfAdd, acfMult)
 ```
 
-
-```{r, echo=FALSE, eval=(period != 1 & nullPresence == TRUE)}
+```{r, echo=FALSE, eval=(period != 1 & (nullPresence == TRUE | negativePresence == TRUE))}
 typ <- 'additive'
 ```
 
 
+`r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {addOrMult(acfAdd, acfMult)}`
 
-`r if(period !=1 & nullPresence == FALSE) {addOrMult(acfAdd, acfMult)}`
-
-`r if(period !=1 & nullPresence == FALSE) {'We can now proceed to the decomposition of the series. We will split the series into trend, seasonal and random component.'}`
+`r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {'We can now proceed to the decomposition of the series. We will split the series into trend, seasonal and random component.'}`
 
 ```{r, echo = F, warning = F, message = F}
 message('aqui')
@@ -382,7 +400,7 @@ plot(decompose(ts, type = 'additive'))
 plot(decompose(ts, type = 'multiplicative'))
 ```
 
-`r if(period !=1) {'### 5) Detecting the order of the Auto-Regressive process'}`
+`r if(period !=1) {'### 5) Detecting the order of the Autoregressive process'}`
 
 `r if(period !=1) {'It is also interesting to check the **partial autocorrelations** plot in order to have better insights on the relationship between the observations. Briefly, the partial autocorrelation at lag k is the correlation that results after removing the effect of any correlations due to the terms at shorter lags. Partial Autocorrelation plots are a commonly used for identifying the order of an autoregressive process AR(p). We select as the order p the last lag that was statistically significant.'}`
 
@@ -406,7 +424,7 @@ findOrder <- function(pacf){
 orderAR <- findOrder(pacf(ts, plot = FALSE))
 ```
 
-`r if(period !=1) {paste('In the above plot we can see that after the lag number ', orderAR, ' the values are not longer significative. That\'s why we conclude that the underlying Auto Regressive process should be of order ', orderAR,'.', sep = '')}`
+`r if(period !=1) {paste('In the above plot we can see that after the lag number ', orderAR, ' the values are no longer significative. That\'s why we conclude that the underlying Auto Regressive process should be of order ', orderAR,'.', sep = '')}`
 
 `r if(period !=1) {'### 6) Exponential Smoothing'}`
 
@@ -426,6 +444,9 @@ message(period)
 
 message('type')
 message(typ)
+
+message('neg')
+message(negativePresence)
 ```
 
 
@@ -445,17 +466,17 @@ if(typ == 'multiplicative'){
 
 if (period > 24){
   #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
-  fit <- auto.arima(ts)
-  aic <- fit$aic
-  aicc <- fit$aicc
-  bic <- fit$bic
+  fitArima <- auto.arima(ts)
+  aic <- fitArima$aic
+  aicc <- fitArima$aicc
+  bic <- fitArima$bic
 }
 
 if (period <= 24){
-  fit<- ets(ts, model = t)
-  aic <- fit$aic
-  aicc <- fit$aicc
-  bic <- fit$bic
+  fitetsOne <- ets(ts, model = t)
+  aic <- fitetsOne$aic
+  aicc <- fitetsOne$aicc
+  bic <- fitetsOne$bic
 }
 
 ```
@@ -467,10 +488,20 @@ hwA <- (HoltWinters(ts, seasonal = 'additive'))
 pA <-predict(hwA, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwA, pA, main ='Additive H-W smoothing')
 
-fit<- ets(ts, model = 'ZZA')
-aica <- fit$aic
-aicc <- fit$aicc
-bic <- fit$bic
+if (period > 24){
+  #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
+  fitArima <- auto.arima(ts)
+  aica <- fitArima$aic
+  aicc <- fitArima$aicc
+  bic <- fitArima$bic
+}
+
+if (period <= 24){
+  fitetsadd <- ets(ts, model = 'ZZA')
+  aica <- fitetsadd $aic
+  aicc <- fitetsadd $aicc
+  bic <- fitetsadd $bic
+}
 ```
 
 `r if((period !=1) & (typ == 'both')){paste('We have used the default optimization of the smoothing parameters alpha, beta and gamma which is the Nelder-Mead Optimization Method. We obtained as optimal values: alpha = ', round(hwA$alpha, 4), ', beta = ', round(hwA$beta, 3), ' and gamma = ' , round(hwA$gamma, 3), '.', sep = '')}`
@@ -482,10 +513,21 @@ hwM <- (HoltWinters(ts, seasonal = 'multiplicative'))
 pM <-predict(hwM, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwM, pM, main = 'Multiplicative H-W smoothing')
 
-fit<- ets(ts, model = 'ZZM')
-aicm <- fit$aic
-aicc <- fit$aicc
-bic <- fit$bic
+if (period > 24){
+  #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
+  #fit <- auto.arima(ts)
+  aicm <- fitArima$aic
+  aicc <- fitArima$aicc
+  bic <- fitArima$bic
+}
+
+if (period <= 24){
+  fitetsmult <- ets(ts, model = 'ZZM')
+  aicm <- fitetsmult$aic
+  aicc <- fitetsmult$aicc
+  bic <- fitetsmult$bic
+}
+
 ```
 
 `r if((period !=1) & (typ == 'both')){paste('We have used the default optimization of the smoothing parameters alpha, beta and gamma which is the Nelder-Mead Optimization Method. We obtained as optimal values: alpha = ',round(hwM$alpha, 4), ', beta = ', round(hwM$beta, 3), ' and gamma = ' , round(hwM$gamma, 3), '.', sep = '')}`
@@ -519,11 +561,11 @@ lastType <- function(aica, aicm){
 #Warning: when the period is larger than 24 the ets function gives us an exception, we prefer to fit an arima model with the parameter D = 1 to take seasonal differenciating into account
 
 if (period > 24){
-  pred <- auto.arima(ts, D = 1)$fitted
+  pred <- fitArima$fitted
 }
 
 if (period <= 24){
-  pred <- ets(ts, model = t)$fitted
+  pred <- fitetsOne$fitted
 }
 
 residuals<- ts - pred
@@ -536,7 +578,20 @@ t <- 'ZZA'
 if (aica > aicm){
   t <- 'ZZM'
 }
-pred <- ets(ts, model = t)$fitted
+
+if (period > 24){
+  pred <- fitArima$fitted
+}
+
+if (period <= 24){
+  if (aica <= aicm){
+      pred <- fitetsadd$fitted
+  }
+  else{
+      pred <- fitetsmult$fitted
+  }
+}
+
 residuals<- ts - pred
 hist(residuals, breaks = 50, main = 'Distribution of the residuals')
 ```
@@ -548,7 +603,7 @@ hist(residuals, breaks = 50, main = 'Distribution of the residuals')
 
 `r if(period !=1) {'We will use percentiles to determine which errors are too big to be considered normal. For now, we will take the 95 percentile but this can be set as a parameter in future versions.'}`
 
-`r if(period !=1) {'We will take as anomalies the points that produced positive errors that are beyond the 97.5 percentile and negative errors that are lower than the 2.25 percentile.'}`
+`r if(period !=1) {'We will take as anomalies the points that produced positive errors that are beyond the 95 percentile and negative errors that are lower than the 5 percentile.'}`
 
 `r if(period !=1) {'We can now filter the data, the detected anomalies are the blue points.'}`
 
@@ -565,7 +620,7 @@ points(which((residuals < lower) | (residuals > upper)), ts[(residuals < lower) 
 
 `r if(period !=1) {'**Using confidence intervals: **'}`
 
-`r if(period !=1) {'We use here a more "classic" technique. The errors are normally distributed so we use gaussian confidence intervals formulas with a confidence level equal to 0.05 (shaded area). The blue points are the detected anomalies.'}`
+`r if(period !=1) {'We use here a more "classic" technique. We use confidence intervals formulas with a confidence level equal to 0.05 (shaded area). The blue points are the detected anomalies.'}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
 upper<- as.vector(pred + sqrt(var(residuals)) *2)
@@ -582,4 +637,3 @@ lines(1:length(ts), pred, col = 'red')
 
 points(which((ts < lower) | (ts> upper)), ts[(ts < lower) | (ts > upper)], pch = 19, col = 'blue')
 ```
-
