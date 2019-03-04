@@ -137,14 +137,14 @@ img {
 #headerTitle h1 {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   font-weight: 100;
   margin: 0;
-  font-size: 26px;
+  font-size: 25px;
 }
 #headerTitle h1 strong {
   color: #9fb214;
-  font-size: 20px;
+  font-size: 22px;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -152,7 +152,6 @@ img {
 }
 #headerTitle h1 span {
   flex-shrink: 0;
-  padding-right: 5rem;
 }
 #TOC ul {
   margin: 35px 0;
