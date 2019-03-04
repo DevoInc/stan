@@ -116,7 +116,7 @@ img {
   display: none;
 }
 #headerTitle {
-  padding: 15px 20px;
+  padding: 15px 10px;
   margin: 35px 0;
   border-bottom: solid 1px #ccc;
   position: absolute;
@@ -129,7 +129,7 @@ img {
   left: 0;
   bottom: -1px;
   height: 3px;
-  width: 205px;
+  width: 155px;
   background: #9fb214;
   display: block;
   position: absolute;
