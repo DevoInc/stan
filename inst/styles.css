@@ -94,7 +94,7 @@ img {
 }
 .main-container {
   max-width: 665px !important;
-  padding: 90px 25px 30px 25px;
+  padding: 98px 25px 30px 25px;
   position: relative;
 }
 
@@ -155,7 +155,7 @@ img {
   padding-right: 5rem;
 }
 #TOC ul {
-  margin: 25px 0;
+  margin: 35px 0;
   padding: 0;
 }
 #TOC ul li {
@@ -165,7 +165,8 @@ img {
   margin-top: 5px;
 }
 #TOC ul li a {
-  color: #9fb214;  
+  color: #9fb214;
+  transition: all ease .3s;
 }
 #TOC ul li a:hover,
 #TOC ul li a:focus {
