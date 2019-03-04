@@ -94,7 +94,7 @@ img {
 }
 .main-container {
   max-width: 665px !important;
-  padding: 100px 35px 30px 35px;
+  padding: 90px 25px 30px 25px;
   position: relative;
 }
 
@@ -116,13 +116,12 @@ img {
   display: none;
 }
 #headerTitle {
-  margin-top: 40px;
-  padding: 15px;
-  margin: 30px 0 35px 0;
-  padding: 0 20px;
+  padding: 15px 20px;
+  margin: 40px 0 35px 0;
   border-bottom: solid 1px #ccc;
   position: absolute;
   top: 0;
+  left: 0;
   width: 100%;
 }
 #headerTitle:after {
@@ -141,11 +140,11 @@ img {
   justify-content: space-between;
   font-weight: 100;
   margin: 0;
-  font-size: 28px;
+  font-size: 26px;
 }
 #headerTitle h1 strong {
   color: #9fb214;
-  font-size: 22px;
+  font-size: 20px;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -155,22 +154,23 @@ img {
   flex-shrink: 0;
   padding-right: 5rem;
 }
-#TOC {
-  margin: 0;
+#TOC ul {
+  margin: 25px 0;
   padding: 0;
 }
-#TOC li {
+#TOC ul li {
   list-style: none;
 }
-#TOC li + li {
+#TOC ul li + li {
   margin-top: 5px;
 }
-#TOC li a {
+#TOC ul li a {
   color: #9fb214;  
 }
-#TOC li a:hover,
-#TOC li a:focus {
-  color: #6c790c;  
+#TOC ul li a:hover,
+#TOC ul li a:focus {
+  color: #6c790c;
+  text-decoration: none;
 }
 
 /* Math Jax _________________________________________ */
