@@ -94,7 +94,7 @@ img {
 }
 .main-container {
   max-width: 665px !important;
-  padding: 98px 25px 30px 25px;
+  padding: 93px 25px 30px 25px;
   position: relative;
 }
 
@@ -117,7 +117,7 @@ img {
 }
 #headerTitle {
   padding: 15px 20px;
-  margin: 40px 0 35px 0;
+  margin: 35px 0;
   border-bottom: solid 1px #ccc;
   position: absolute;
   top: 0;
