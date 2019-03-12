@@ -2,7 +2,6 @@
 title: "Time Series Report"
 output: 
   html_document:
-    toc: true
     theme: default
     highlight: null
     css: styles.css
@@ -31,6 +30,7 @@ library(fUnitRoots)
 library(forecast)
 library(nnet)
 library(zoo)
+library(RJSONIO)
 ```
 
 ```{r, echo=FALSE}
@@ -116,7 +116,11 @@ message('period')
 message(period)
 ```
 
-<div class="fluid-row" id="headerTitle"><h1 class="title toc-ignore"><span>Time series for column:</span>&nbsp;<strong>`r name`</strong></h1></div>
+<div class="fluid-row" id="headerTitle"><h1 class="title toc-ignore"><span>Time series </span><strong>`r name`</strong></h1></div>
+
+### Introduction
+
+A report describing the series as thoroughly as possible is generated thereafter. The aim of this report is to extract key information about the series so that the user can take good decisions about his data. The report analyses the series and starts by performing simple transformations and then does more advanced checks. The ultimate goal of this functionnality is to automatically define alert thresholds in order to answer anomaly detection problematics. In the annex of this report we can see a use case where we use the parameters extracted in the report to perform time series smoothing and to automatically detect anomalies. This report will ultimately serve for defining alerts in a simple and intuitive way.
 
 ### 1) Descriptive Analysis and Missing Values 
 
@@ -452,12 +456,19 @@ message(negativePresence)
 
 
 ```{r, echo=FALSE, eval=((period != 1) & (typ != 'both') & (typ != 'null')), warning=FALSE}
-hw <- HoltWinters(ts, seasonal = typ)
-p <-predict(hw, n.ahead = period * 2, prediction.interval = TRUE)
-plot(hw, p, main = paste(typ, ' H-W smoothing'))
+hwinters <- HoltWinters(ts, seasonal = typ)
+p <-predict(hwinters, n.ahead = period * 2, prediction.interval = TRUE)
+plot(hwinters, p, main = paste(typ, 'H-W smoothing'))
+
+if(type == 'additive'){
+  hwA <- hwinters
+}
+if(type == 'multiplicative'){
+  hwM <- hwinters
+}
 ```
 
-`r if((period !=1) & (typ != 'both')){paste('We have used the default optimization of the smoothing parameters alpha, beta and gamma which is the Nelder-Mead Optimization Method. We obtained as optimal values: alpha = ', round(hw$alpha, 4), ', beta = ', round(hw$beta, 3), ' and gamma = ' , round(hw$gamma, 3), '.', sep = '')}`
+`r if((period !=1) & (typ != 'both')){paste('We have used the default optimization of the smoothing parameters alpha, beta and gamma which is the Nelder-Mead Optimization Method. We obtained as optimal values: alpha = ', round(hwinters$alpha, 4), ', beta = ', round(hwinters$beta, 3), ' and gamma = ' , round(hwinters$gamma, 3), '.', sep = '')}`
 
 ```{r, echo=FALSE, eval=((period!=1) & (typ != 'both') & (typ != 'null'))}
 t <- 'ZZA'
@@ -499,9 +510,9 @@ if (period > 24){
 
 if (period <= 24){
   fitetsadd <- ets(ts, model = 'ZZA')
-  aica <- fitetsadd $aic
-  aicc <- fitetsadd $aicc
-  bic <- fitetsadd $bic
+  aica <- fitetsadd$aic
+  aicc <- fitetsadd$aicc
+  bic <- fitetsadd$bic
 }
 ```
 
@@ -555,7 +566,7 @@ lastType <- function(aica, aicm){
 
 
 
-`r if(period !=1) {'We will fit a Holt Winters smoothing as explained in the previous section, we will take a look at the errors produced (residuals = predicted value - actual value) and check their distribution.'}`
+`r if(period !=1) {'We will fit a Holt Winters smoothing as explained in the previous section, we will take a look at the errors (the residuals) produced by taking the absolute value of the difference between the smoothing and the true values. Their distribution is below.'}`
 
 ```{r, echo=FALSE, eval = ((period!=1) & (typ != 'both'))}
 #we use the ets function here in order to have the same predictions length
@@ -569,7 +580,7 @@ if (period <= 24){
   pred <- fitetsOne$fitted
 }
 
-residuals<- ts - pred
+residuals<- abs(ts - pred)
 hist(residuals, breaks = 50, main = 'Distribution of the residuals')
 ```
 
@@ -593,7 +604,7 @@ if (period <= 24){
   }
 }
 
-residuals<- ts - pred
+residuals<- abs(ts - pred)
 hist(residuals, breaks = 50, main = 'Distribution of the residuals')
 ```
 
@@ -610,13 +621,19 @@ hist(residuals, breaks = 50, main = 'Distribution of the residuals')
 
 
 ```{r, echo=FALSE, eval=(period!=1)}
+threshold <- quantile(residuals, 0.95)
+```
 
-upper<- quantile(residuals, 0.95)
-lower<- quantile(residuals, 0.05)
+`r if((period !=1) & (typ == 'both')) {paste('As we were not able to choose one type of model previously, we decide to perform the filtering on the model with the lowest AIC, which is ', lastType(aica, aicm), '.', sep = '')}`
 
+`r if(period !=1) {paste('We will take as anomalies the points that produced residuals that are beyond the 95 percentile, this corresponds to the value ', threshold, '.', sep = '')}`
+
+`r if(period !=1) {'We can now filter the data, the detected anomalies are the blue points.'}`
+
+```{r, echo=FALSE, eval=(period!=1)}
 plot(as.vector(ts), main = 'Filtering with percentiles', type = 'l', xlab = 'Time', ylab = 'Series')
 lines(1:length(ts), pred, col = 'red')
-points(which((residuals < lower) | (residuals > upper)), ts[(residuals < lower) | (residuals > upper)], pch = 19, col = 'blue')
+points(which(residuals > threshold), ts[(residuals > threshold)], pch = 19, col = 'blue')
 ```
 
 `r if(period !=1) {'**Using confidence intervals: **'}`
@@ -624,8 +641,9 @@ points(which((residuals < lower) | (residuals > upper)), ts[(residuals < lower) 
 `r if(period !=1) {'We use here a more "classic" technique. We use confidence intervals formulas with a confidence level equal to 0.05 (shaded area). The blue points are the detected anomalies.'}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
-upper<- as.vector(pred + sqrt(var(residuals)) *2)
-lower<- as.vector(pred - sqrt(var(residuals)) *2)
+std_res <- sqrt(var(residuals))
+upper<- as.vector(pred + std_res *2)
+lower<- as.vector(pred - std_res *2)
 
 plot(1:length(ts), lower, type = 'n', main = 'Filtering with confidence intervals', xlab = 'Time', ylab = 'Series', ylim = c(min(min(lower), min(ts)), max(max(upper), max(ts))))
 lines(1:length(ts), upper, col = 'grey')
@@ -638,3 +656,43 @@ lines(1:length(ts), pred, col = 'red')
 
 points(which((ts < lower) | (ts> upper)), ts[(ts < lower) | (ts > upper)], pch = 19, col = 'blue')
 ```
+
+```{r, echo=FALSE}
+#We build the json object that contains all parameters necessary to the subsequent study.
+list1 <- vector(mode="list")
+list1[['period']] <- period
+list1[['pvalue']] <- pValue
+list1[['d']] <- my_lag
+list1[['p']] <- orderAR
+```
+
+```{r, echo=FALSE, eval = (typ != 'both')}
+#We build the json object that contains all parameters necessary to the subsequent study.
+list1[['type']] <- typ
+list1[['alpha']] <- round(hwinters$alpha, 4)
+list1[['beta']] <- round(hwinters$beta, 4)
+list1[['gamma']] <- round(hwinters$gamma, 4)
+list1[['thresholdPercentile']] <- threshold
+list1[['thresholdConfInt']] <- std_res
+```
+
+```{r, echo=FALSE, eval = (typ == 'both')}
+list1[['type']] <- typ
+list1[['alphaA']] <- round(hwA$alpha, 4)
+list1[['betaA']] <- round(hwA$beta, 4)
+list1[['gammaA']] <- round(hwA$gamma, 4)
+list1[['alphaM']] <- round(hwM$alpha, 4)
+list1[['betaM']] <- round(hwM$beta, 4)
+list1[['gammaM']] <- round(hwM$gamma, 4)
+list1[['chosenType']] <- lastType(aica, aicm)
+list1[['thresholdPercentile']] <- threshold
+list1[['thresholdConfInt']] <- std_res
+```
+
+```{r, echo=FALSE}
+exportJson <- jsonlite::toJSON(list1, pretty = TRUE)
+write(exportJson, "test.json")
+```
+
+### Annex: Use Cases
+
