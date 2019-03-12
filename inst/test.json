@@ -1,0 +1,21 @@
+{
+
+  "period": [24],
+
+  "pvalue": [0.0404],
+
+  "d": [0],
+
+  "p": [1],
+
+  "alpha": [0.5479],
+
+  "beta": [0.0008],
+
+  "gamma": [0.0777],
+
+  "thresholdPercentile": [47482.6151],
+
+  "thresholdConfInt": [18223.2361]
+
+}
