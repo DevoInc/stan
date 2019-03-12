@@ -669,7 +669,7 @@ list1[['d']] <- my_lag
 list1[['p']] <- orderAR
 ```
 
-```{r, echo=FALSE, eval = (typ != 'both')}
+```{r, echo=FALSE, eval = (typ != 'both' & typ != 'null')}
 #We build the json object that contains all parameters necessary to the subsequent study.
 list1[['type']] <- typ
 list1[['alpha']] <- round(hwinters$alpha, 4)
