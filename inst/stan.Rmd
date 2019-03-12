@@ -703,8 +703,8 @@ write(exportJson, "test.json")
 
 ### Annex: Use Cases
 
-```{r, echo=FALSE}
-pp <- dame string que corresponde al valor del periodo
+```{r, echo=FALSE, eval = FALSE}
+#pp <- dame string que corresponde al valor del periodo
 
 getprediction(periodo, alpha, beta)
 ```
