@@ -203,6 +203,7 @@ orderAR <- 0
 
 ```{r, echo=FALSE, eval=(period!=1)}
 plot(acf(ts, plot = FALSE), main = 'Autocorrelation with lagged versions')
+legend('topleft', legend = 'Confidence Interval', col = 'blue', cex = 0.8)
 ```
 
 ```{r, echo=FALSE, eval= (period!=1 & periodCorrelation != -1 )}
@@ -244,7 +245,6 @@ pValue <- res@test$p.value
 my_lag <- ndiffs(ts)
 
 testResult <- function (pValue){
-
   if (pValue < 0.05){
     return(paste0('We use the **Dickey-Fuller** test in order to test the null hypothesis H0: ‘The series contains a unit root’ (i.e. is
 not stationary). At a 0.05% level of confidence, the p-value (', round(pValue,3), ') is small and thus we have enough evidence to reject the null hypothesis and conclude that the series is indeed **stationary**.'));
@@ -694,8 +694,17 @@ list1[['thresholdConfInt']] <- std_res
 
 ```{r, echo=FALSE}
 exportJson <- toJSON(list1, pretty = TRUE)
+```
+
+
+```{r, echo=FALSE, eval=FALSE}
 write(exportJson, "test.json")
 ```
 
 ### Annex: Use Cases
 
+```{r, echo=FALSE}
+pp <- dame string que corresponde al valor del periodo
+
+getprediction(periodo, alpha, beta)
+```
