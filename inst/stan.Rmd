@@ -694,7 +694,7 @@ list1[['thresholdConfInt']] <- std_res
 
 ```{r, echo=FALSE}
 exportJson <- toJSON(list1, pretty = TRUE)
-write(exportJson, "/myOutputs/test.json")
+write(exportJson, "test.json")
 ```
 
 ### Annex: Use Cases
