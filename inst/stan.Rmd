@@ -31,6 +31,7 @@ library(forecast)
 library(nnet)
 library(zoo)
 library(RJSONIO)
+library(jsonlite)
 ```
 
 ```{r, echo=FALSE}
@@ -692,7 +693,7 @@ list1[['thresholdConfInt']] <- std_res
 ```
 
 ```{r, echo=FALSE}
-exportJson <- jsonlite::toJSON(list1, pretty = TRUE)
+exportJson <- toJSON(list1, pretty = TRUE)
 write(exportJson, "test.json")
 ```
 
