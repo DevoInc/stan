@@ -62,6 +62,7 @@ if (constant){
   acf <- 0
   nullPresence <- FALSE
   negativePresence <-FALSE
+  orderAR <- 0
 }
 ```
 
@@ -194,6 +195,7 @@ typ = 'null'
 nullPresence <- FALSE
 negativePresence <- FALSE
 my_lag <- 1
+orderAR <- 0
 ```
 
 `r if(constant == FALSE) {chunk2}`
@@ -460,10 +462,10 @@ hwinters <- HoltWinters(ts, seasonal = typ)
 p <-predict(hwinters, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwinters, p, main = paste(typ, 'H-W smoothing'))
 
-if(type == 'additive'){
+if(typ == 'additive'){
   hwA <- hwinters
 }
-if(type == 'multiplicative'){
+if(typ == 'multiplicative'){
   hwM <- hwinters
 }
 ```
