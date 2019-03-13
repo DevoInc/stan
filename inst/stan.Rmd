@@ -204,7 +204,7 @@ orderAR <- 0
 
 ```{r, echo=FALSE, eval=(period!=1)}
 plot(acf(ts, plot = FALSE), main = 'Autocorrelation with lagged versions')
-legend('topleft', legend = 'Confidence Interval', col = 'blue', cex = 0.8)
+legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2)
 ```
 
 ```{r, echo=FALSE, eval= (period!=1 & periodCorrelation != -1 )}
@@ -232,7 +232,7 @@ We display the plot:'
 
 
 ```{r, echo=FALSE, eval=(period!=1)}
-  plot(spec.ar(ts, plot = FALSE), main = paste('Spectral Density of', name))
+plot(spec.ar(ts, plot = FALSE), main = paste('Spectral Density of', name), ylab = 'Spectral Density')
 ```
 
 `r if (period != 1) {paste('This method returns a period of length ', period, '. We have found, empirically, that in practice, this method performs better than the previous one. We will keep this result for the future.', sep = '')}`
@@ -281,7 +281,7 @@ message(ndiffs(ts))
 
 ```{r, echo=FALSE, eval=(period!=1 & pValue >= 0.05)}
 if(my_lag == 0){my_lag = my_lag + 1}
-plot(diff(ts, lag = my_lag), main = paste('Differentiation at lag = ', my_lag))
+plot(diff(ts, lag = my_lag), main = paste('Differentiation at lag = ', my_lag), ylab = 'Differentiated Series')
 ```
 
 `r if(period !=1 & pValue >= 0.05 & my_lag == 1) {paste0('After ', my_lag, ' differenciation, we can say that the series is already stationary. Subsequently, if an ARIMA(p,d,q) model is fitted, the d parameter that stands for the degree of differenciating will be equal to ', my_lag, '.')}`
@@ -332,7 +332,11 @@ randomAdd <- na.approx(decompose(ts, type = "additive")$random, rule = 2)
 randomMult <- na.approx(decompose(ts, type = "multiplicative")$random, rule = 2)
 
 plot(acf(randomAdd, plot = FALSE), main ='Autocorrelation on the additive residuals')
+legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2)
+
 plot(acf(randomMult, plot = FALSE), main = 'Autocorrelation on the multiplicative residuals')
+legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2)
+
 ```
 
 ```{r, echo=FALSE, eval=(period!=1 & nullPresence == FALSE & negativePresence == FALSE)}
@@ -415,6 +419,7 @@ plot(decompose(ts, type = 'multiplicative'))
 
 ```{r, echo=FALSE, eval=(period!=1)}
 plot(pacf(ts, plot = FALSE), main = paste('Partial Autocorrelations of the', name, 'series'))
+legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2)
 ```
 
 ```{r, echo=FALSE, eval=(period!=1)}
@@ -463,6 +468,8 @@ message(negativePresence)
 hwinters <- HoltWinters(ts, seasonal = typ)
 p <-predict(hwinters, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwinters, p, main = paste(typ, 'H-W smoothing'))
+legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1)
+
 
 if(typ == 'additive'){
   hwA <- hwinters
@@ -503,6 +510,7 @@ if (period <= 24){
 hwA <- (HoltWinters(ts, seasonal = 'additive'))
 pA <-predict(hwA, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwA, pA, main ='Additive H-W smoothing')
+legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1)
 
 if (period > 24){
   #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
@@ -528,6 +536,7 @@ if (period <= 24){
 hwM <- (HoltWinters(ts, seasonal = 'multiplicative'))
 pM <-predict(hwM, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwM, pM, main = 'Multiplicative H-W smoothing')
+legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1)
 
 if (period > 24){
   #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
@@ -635,9 +644,10 @@ threshold <- quantile(residuals, 0.95)
 `r if(period !=1) {'We can now filter the data, the detected anomalies are the blue points.'}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
-plot(as.vector(ts), main = 'Filtering with percentiles', type = 'l', xlab = 'Time', ylab = 'Series')
+plot(as.vector(ts), main = 'Filtering with percentiles', type = 'l', xlab = 'Time', ylab = '')
 lines(1:length(ts), pred, col = 'red')
 points(which(residuals > threshold), ts[(residuals > threshold)], pch = 19, col = 'blue')
+legend('topleft', legend = c('Time Series', 'Prediction','Detected Anomaly'), col = c('black', 'red', 'blue'), lty = c(1, 1, 0), pch = c(NA, NA, 19))
 ```
 
 `r if(period !=1) {'**Using confidence intervals: **'}`
@@ -659,6 +669,11 @@ lines(1:length(ts), ts, col = 'black')
 lines(1:length(ts), pred, col = 'red')
 
 points(which((ts < lower) | (ts> upper)), ts[(ts < lower) | (ts > upper)], pch = 19, col = 'blue')
+
+plot(as.vector(ts), main = 'Filtering with percentiles', type = 'l', xlab = 'Time', ylab = '')
+lines(1:length(ts), pred, col = 'red')
+points(which(residuals > threshold), ts[(residuals > threshold)], pch = 19, col = 'blue')
+legend('topleft', legend = c('Time Series', 'Prediction','Confidence Interval','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue', NA), lty = c(1, 1, NA, NA), pch = c(NA, NA, 19, NA), density=c(0,0,0,NA), fill = c('black', 'red', 'blue', 'grey'), border = c(NA,NA,NA,"grey"))
 ```
 
 ```{r, echo=FALSE}
@@ -704,8 +719,8 @@ write(exportJson, "test.json")
 
 ### Annex: Use Cases
 
-```{r, echo=FALSE, eval = FALSE}
-#pp <- dame string que corresponde al valor del periodo
 
-getprediction(periodo, alpha, beta)
-```
+
+
+
+
