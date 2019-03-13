@@ -629,7 +629,7 @@ hist(residuals, breaks = 50, main = 'Distribution of the residuals')
 threshold <- quantile(residuals, 0.95)
 ```
 
-`r if(period !=1) {'In brief, the points that produced residual errors that are beyond the 95 percentile will be taken as anomalies, this corresponds to the value ', round(threshold, 3), '. This means that an anomaly is found when the difference between the series and the smoothing is greater than the threshold value.'}`
+`r if(period !=1) {paste0('In brief, the points that produced residual errors that are beyond the 95 percentile will be taken as anomalies, this corresponds to the value ', round(threshold, 3), '. This means that an anomaly is found when the difference between the series and the smoothing is greater than the threshold value.', sep = '')}`
 
 `r if(period !=1) {'The results are ploted below, the blue points are the detected anomalies.'}`
 
