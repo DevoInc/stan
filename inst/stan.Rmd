@@ -123,7 +123,7 @@ message(period)
 
 ### Introduction
 
-A report describing the series as thoroughly as possible is generated thereafter. The aim of this report is to extract key information about the series so that the user can take good decisions about his data. The report analyses the series and starts by performing simple transformations and then does more advanced checks. The ultimate goal of this functionnality is to automatically define alert thresholds in order to answer anomaly detection problematics. In the annex of this report there is a use case where the parameters extracted in the report are used to perform time series smoothing and to automatically detect anomalies. This report will ultimately serve for defining alerts in a simple and intuitive way.
+A report describing the series as thoroughly as possible is generated thereafter. The aim of this report is to extract key information about the series so that the user can take good decisions about his data. The report analyses the series and starts by performing simple transformations and then does more advanced checks. The ultimate goal of this functionnality is to automatically define alert thresholds in order to answer anomaly detection problematics. In the annex of this report there is a use case where the parameters extracted in the report are used to perform time series smoothing and to automatically detect anomalies. This report will ultimately be used for defining alerts in a simple and intuitive way.
 
 ### 1) Descriptive Analysis and Missing Values 
 
