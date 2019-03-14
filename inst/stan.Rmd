@@ -506,7 +506,7 @@ if (period <= 24){
 `r if((period !=1) & (typ != 'both')){paste('In this case, the AIC is equal to ', round(aic,3),' and the BIC equals ', round(bic,3), '. These indicators can be useful in a future model selection.', sep = '')}`
 
 ```{r, echo=FALSE, eval=((period != 1) & (typ == 'both')), warning=FALSE}
-t <- 'additive'
+t <- 'ZZA'
 
 hwA <- (HoltWinters(ts, seasonal = 'additive'))
 pA <-predict(hwA, n.ahead = period * 2, prediction.interval = TRUE)
@@ -534,7 +534,7 @@ if (period <= 24){
 `r if((period !=1) & (typ == 'both')){paste('In the additive case, the AIC is equal to ', round(aica,3),' and the BIC equals ', round(bic,3), '. These indicators can be useful in a future model selection.', sep = '')}`
 
 ```{r, echo=FALSE, eval=((period != 1) & (typ == 'both')), warning=FALSE}
-t <- 'multiplicative'
+t <- 'ZZM'
 
 hwM <- (HoltWinters(ts, seasonal = 'multiplicative'))
 pM <-predict(hwM, n.ahead = period * 2, prediction.interval = TRUE)
