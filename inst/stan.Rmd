@@ -724,18 +724,16 @@ write(exportJson, "test.json")
 
 `r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length and the three smoothing parameters are used to perform a Holt Winters smoothing automatically, afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts. The code is available in two languages: R and Python'}` 
 
-`r if(period !=1) {'**TO-DO:** Inyect the table generated back in DEVO!'}` 
-
 `r if(period !=1) {'#### R'}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
-paste('period <-', period)
-paste('alpha <-', hwinters$alpha)
-paste('beta <-', hwinters$beta)
-paste('gamma <-', hwinters$gamma)
-paste('type <-', t)
-paste('thresholdPercentile <-', threshold)
-paste('thresholdConfInt <-', std_res)
+message('period <- ', period)
+message('alpha <- ', hwinters$alpha)
+message('beta <- ', hwinters$beta)
+message('gamma <- ', hwinters$gamma)
+message('type <- ', t)
+message('thresholdPercentile <- ', threshold)
+message('thresholdConfInt <- ', std_res)
 ```
 
 ```{r, eval=FALSE}
@@ -749,13 +747,13 @@ colnames(total_table) <- c('trueValue', 'predictions', 'thresholdPercentile', 't
 `r if(period !=1) {'#### Python'}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
-paste('period =', period)
-paste('alpha =', hwinters$alpha)
-paste('beta =', hwinters$beta)
-paste('gamma =', hwinters$gamma)
-paste('type =', t)
-paste('thresholdPercentile =', threshold)
-paste('thresholdConfInt =', std_res)
+message('period = ', period)
+message('alpha = ', hwinters$alpha)
+message('beta = ', hwinters$beta)
+message('gamma = ', hwinters$gamma)
+message('type = ', t)
+message('thresholdPercentile = ', threshold)
+message('thresholdConfInt = ', std_res)
 ```
 
 ```{r, eval=FALSE}
@@ -772,5 +770,5 @@ total_table['thresholdConfInt'] = thresholdConfInt
 ```
 
 
-
+`r if(period !=1) {'**TO-DO: ** Inyect the table generated back in DEVO!'}` 
 
