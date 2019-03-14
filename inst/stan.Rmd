@@ -570,9 +570,11 @@ if (period <= 24){
 ```{r, echo=FALSE, eval = (period !=1) & (typ == 'both')}
 lastType <- function(aica, aicm){
   if (aica < aicm){
+    hwinters <- hwA
     return('additive')
   }
   else{
+    hwinters <- hwM
     return('multiplicative')
   }
 }
@@ -723,11 +725,11 @@ write(exportJson, "test.json")
 
 `r if(period !=1) {'#### R'}`
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=(period!=1)}
 paste('period <-', period)
-paste('alpha <-', alpha)
-paste('beta <-', beta)
-paste('gamma <-', gamma)
+paste('alpha <-', hwinters$alpha)
+paste('beta <-', hwintersbeta)
+paste('gamma <-', hwintersgamma)
 paste('type <-', t)
 paste('thresholdPercentile <-', threshold)
 paste('thresholdConfInt <-', std_res)
@@ -743,11 +745,11 @@ colnames(total_table) <- c('trueValue', 'predictions', 'thresholdPercentile', 't
 
 `r if(period !=1) {'#### Python'}`
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=(period!=1)}
 paste('period =', period)
-paste('alpha =', alpha)
-paste('beta =', beta)
-paste('gamma =', gamma)
+paste('alpha =', hwinters$alpha)
+paste('beta =', hwinters$beta)
+paste('gamma =', hwinters$gamma)
 paste('type =', t)
 paste('thresholdPercentile =', threshold)
 paste('thresholdConfInt =', std_res)
