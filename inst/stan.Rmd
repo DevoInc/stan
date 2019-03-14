@@ -736,8 +736,8 @@ paste('thresholdConfInt <-', std_res)
 ```{r, eval=FALSE}
 smoothing <- ets(ts, alpha = alpha, beta = beta, gamma = gamma, model = t)
 total_table <- cbind(ts, smoothing$fitted)
-total_table <- cbind(ts, thresholdPercentile)
-total_table <- cbind(ts, thresholdConfInt)
+total_table <- cbind(total_table, thresholdPercentile)
+total_table <- cbind(total_table, thresholdConfInt)
 colnames(total_table) <- c('trueValue', 'predictions', 'thresholdPercentile', 'thresholdConfInt')
 ```
 
