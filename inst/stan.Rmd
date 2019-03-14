@@ -570,13 +570,16 @@ if (period <= 24){
 ```{r, echo=FALSE, eval = (period !=1) & (typ == 'both')}
 lastType <- function(aica, aicm){
   if (aica < aicm){
-    hwinters <- hwA
     return('additive')
   }
   else{
-    hwinters <- hwM
     return('multiplicative')
   }
+}
+
+hwinters <- hwA
+if (aica > aicm){
+  hwinters <- hwM
 }
 ```
 
@@ -728,8 +731,8 @@ write(exportJson, "test.json")
 ```{r, echo=FALSE, eval=(period!=1)}
 paste('period <-', period)
 paste('alpha <-', hwinters$alpha)
-paste('beta <-', hwintersbeta)
-paste('gamma <-', hwintersgamma)
+paste('beta <-', hwinters$beta)
+paste('gamma <-', hwinters$gamma)
 paste('type <-', t)
 paste('thresholdPercentile <-', threshold)
 paste('thresholdConfInt <-', std_res)
