@@ -506,6 +506,8 @@ if (period <= 24){
 `r if((period !=1) & (typ != 'both')){paste('In this case, the AIC is equal to ', round(aic,3),' and the BIC equals ', round(bic,3), '. These indicators can be useful in a future model selection.', sep = '')}`
 
 ```{r, echo=FALSE, eval=((period != 1) & (typ == 'both')), warning=FALSE}
+t <- 'additive'
+
 hwA <- (HoltWinters(ts, seasonal = 'additive'))
 pA <-predict(hwA, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwA, pA, main ='Additive H-W smoothing')
@@ -520,7 +522,7 @@ if (period > 24){
 }
 
 if (period <= 24){
-  fitetsadd <- ets(ts, model = 'ZZA')
+  fitetsadd <- ets(ts, model = t)
   aica <- fitetsadd$aic
   aicc <- fitetsadd$aicc
   bic <- fitetsadd$bic
@@ -532,6 +534,8 @@ if (period <= 24){
 `r if((period !=1) & (typ == 'both')){paste('In the additive case, the AIC is equal to ', round(aica,3),' and the BIC equals ', round(bic,3), '. These indicators can be useful in a future model selection.', sep = '')}`
 
 ```{r, echo=FALSE, eval=((period != 1) & (typ == 'both')), warning=FALSE}
+t <- 'multiplicative'
+
 hwM <- (HoltWinters(ts, seasonal = 'multiplicative'))
 pM <-predict(hwM, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwM, pM, main = 'Multiplicative H-W smoothing')
@@ -546,7 +550,7 @@ if (period > 24){
 }
 
 if (period <= 24){
-  fitetsmult <- ets(ts, model = 'ZZM')
+  fitetsmult <- ets(ts, model = t)
   aicm <- fitetsmult$aic
   aicc <- fitetsmult$aicc
   bic <- fitetsmult$bic
@@ -598,8 +602,11 @@ hist(residuals, breaks = 50, main = 'Distribution of the residuals')
 ```{r, echo=FALSE, eval = ((period!=1) & (typ == 'both'))}
 #we use the ets function here in order to have the same predictions length
 t <- 'ZZA'
+typ = 'additive'
+
 if (aica > aicm){
   t <- 'ZZM'
+  typ = 'multiplicative'
 }
 
 if (period > 24){
@@ -661,14 +668,14 @@ lines(1:length(ts), ts, col = 'black')
 lines(1:length(ts), pred, col = 'red')
 points(which((ts < lower) | (ts> upper)), ts[(ts < lower) | (ts > upper)], pch = 19, col = 'blue')
 
-legend('topleft', legend = c('Time Series', 'Prediction','Confidence Interval','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue', NA), lty = c(1, 1, NA, NA), pch = c(NA, NA, 19, NA), density=c(0,0,0,NA), fill = c('black', 'red', 'blue', 'grey'), border = c(NA,NA,NA,"grey"))
+legend('topleft', legend = c('Time Series', 'Prediction','Confidence Interval','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue', NA), lty = c(1, 1, NA, NA), pch = c(NA, NA, 19, NA), density=c(0,0,0,NA), fill = c('black', 'red', 'blue', 'grey'), border = c(NA,NA,NA,"grey"), inset = c(-0.05,-0.1), xpd = TRUE, horiz = TRUE)
 
 countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 ```
 
-`r if(period !=1) {paste0('This technique has identified ', countAnomaliesConfidence, ' anomalous observations in the series.', sep = '')}`
+`r if(period !=1) {paste0('This technique has identified ', countAnomaliesConfidence, ' anomalous observations in the series.', sep = ''}`
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval = FALSE}
 #We build the json object that contains all parameters necessary to the subsequent study.
 list1 <- vector(mode="list")
 list1[['period']] <- period
@@ -677,7 +684,7 @@ list1[['d']] <- my_lag
 list1[['p']] <- orderAR
 ```
 
-```{r, echo=FALSE, eval = (typ != 'both' & typ != 'null')}
+```{r, echo=FALSE, eval = FALSE}
 #We build the json object that contains all parameters necessary to the subsequent study.
 list1[['type']] <- typ
 list1[['alpha']] <- round(hwinters$alpha, 4)
@@ -687,7 +694,7 @@ list1[['thresholdPercentile']] <- threshold
 list1[['thresholdConfInt']] <- std_res
 ```
 
-```{r, echo=FALSE, eval = (typ == 'both')}
+```{r, echo=FALSE, eval = FALSE}
 list1[['type']] <- typ
 list1[['alphaA']] <- round(hwA$alpha, 4)
 list1[['betaA']] <- round(hwA$beta, 4)
@@ -700,7 +707,7 @@ list1[['thresholdPercentile']] <- threshold
 list1[['thresholdConfInt']] <- std_res
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval = FALSE}
 exportJson <- toJSON(list1, pretty = TRUE)
 ```
 
@@ -708,13 +715,56 @@ exportJson <- toJSON(list1, pretty = TRUE)
 write(exportJson, "test.json")
 ```
 
-### Annex: Use Cases
+`r if(period !=1) {'### Annex: Use Cases'}`
 
-####R
+`r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length and the three smoothing parameters are used to perform a Holt Winters smoothing automatically, afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts. The code is available in two languages: R and Python'}` 
 
-####Python
+`r if(period !=1) {'**TO-DO:** Inyect the table generated back in DEVO!'}` 
 
+`r if(period !=1) {'#### R'}`
 
+```{r, echo=FALSE}
+paste('period <-', period)
+paste('alpha <-', alpha)
+paste('beta <-', beta)
+paste('gamma <-', gamma)
+paste('type <-', t)
+paste('thresholdPercentile <-', threshold)
+paste('thresholdConfInt <-', std_res)
+```
+
+```{r, eval=FALSE}
+smoothing <- ets(ts, alpha = alpha, beta = beta, gamma = gamma, model = t)
+total_table <- cbind(ts, smoothing$fitted)
+total_table <- cbind(ts, thresholdPercentile)
+total_table <- cbind(ts, thresholdConfInt)
+colnames(total_table) <- c('trueValue', 'predictions', 'thresholdPercentile', 'thresholdConfInt')
+```
+
+`r if(period !=1) {'#### Python'}`
+
+```{r, echo=FALSE}
+paste('period =', period)
+paste('alpha =', alpha)
+paste('beta =', beta)
+paste('gamma =', gamma)
+paste('type =', t)
+paste('thresholdPercentile =', threshold)
+paste('thresholdConfInt =', std_res)
+```
+
+```{r, eval=FALSE}
+ets_model = ExponentialSmoothing(ts, trend='add', seasonal='add', 
+seasonal_periods=period_found)
+smoothing = ets_model.fit(smoothing_level=alpha, smoothing_slope=beta, smoothing_seasonal=gamma)
+
+percentileThreshold = total_table['thresholdPercentile']
+thresholdConfInf = total_table['thresholdConfInt']
+total_table= pd.concat([ts, smoothing.fittedvalues], axis = 1)
+total_table = total_table.rename(columns={'max_open_files': 'trueValue', 0: 'predictions'})
+total_table['thresholdPercentile'] = thresholdPercentile
+total_table['thresholdConfInt'] = thresholdConfInt
+```
 
 
 
