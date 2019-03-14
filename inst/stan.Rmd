@@ -673,7 +673,7 @@ legend('topleft', legend = c('Time Series', 'Prediction','Confidence Interval','
 countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 ```
 
-`r if(period !=1) {paste0('This technique has identified ', countAnomaliesConfidence, ' anomalous observations in the series.', sep = ''}`
+`r if(period !=1) {paste0('This technique has identified ', countAnomaliesConfidence, ' anomalous observations in the series.', sep = '')}`
 
 ```{r, echo=FALSE, eval = FALSE}
 #We build the json object that contains all parameters necessary to the subsequent study.
