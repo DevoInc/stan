@@ -727,13 +727,9 @@ write(exportJson, "test.json")
 `r if(period !=1) {'#### R'}`
 
 ```{r comment=NA, echo=FALSE, eval=(period!=1)}
-message('period <- ', period)
-message('alpha <- ', hwinters$alpha)
-message('beta <- ', hwinters$beta)
-message('gamma <- ', hwinters$gamma)
-message('type <- ', t)
-message('thresholdPercentile <- ', threshold)
-message('thresholdConfInt <- ', std_res)
+message('period <- ', period, '\nalpha <- ', hwinters$alpha, '\nbeta <- ', hwinters$beta,
+        '\ngamma <- ', hwinters$gamma, '\ntype <- ', t, '\nthresholdPercentile <- ', threshold,
+        '\nthresholdConfInt <- ', std_res)
 ```
 
 ```{r, eval=FALSE}
@@ -747,13 +743,9 @@ colnames(total_table) <- c('trueValue', 'predictions', 'thresholdPercentile', 't
 `r if(period !=1) {'#### Python'}`
 
 ```{r comment=NA, echo=FALSE, eval=(period!=1)}
-message('period = ', period, '\nalpha = ', hwinters$alpha)
-message('alpha = ', hwinters$alpha)
-message('beta = ', hwinters$beta)
-message('gamma = ', hwinters$gamma)
-message('type = ', t)
-message('thresholdPercentile = ', threshold)
-message('thresholdConfInt = ', std_res)
+message('period = ', period, '\nalpha = ', hwinters$alpha, '\nbeta = ', hwinters$beta,
+        '\ngamma = ', hwinters$gamma, '\ntype = ', t, '\nthresholdPercentile = ', threshold,
+        '\nthresholdConfInt = ', std_res)
 ```
 
 ```{r, eval=FALSE}
