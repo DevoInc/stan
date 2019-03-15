@@ -726,7 +726,7 @@ write(exportJson, "test.json")
 
 `r if(period !=1) {'#### R'}`
 
-```{r, echo=FALSE, eval=(period!=1)}
+```{r comment=NA, echo=FALSE, eval=(period!=1)}
 message('period <- ', period)
 message('alpha <- ', hwinters$alpha)
 message('beta <- ', hwinters$beta)
@@ -746,8 +746,8 @@ colnames(total_table) <- c('trueValue', 'predictions', 'thresholdPercentile', 't
 
 `r if(period !=1) {'#### Python'}`
 
-```{r, echo=FALSE, eval=(period!=1)}
-message('period = ', period)
+```{r comment=NA, echo=FALSE, eval=(period!=1)}
+message('period = ', period, '\nalpha = ', hwinters$alpha)
 message('alpha = ', hwinters$alpha)
 message('beta = ', hwinters$beta)
 message('gamma = ', hwinters$gamma)
