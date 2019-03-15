@@ -218,9 +218,7 @@ chunk2bis <- paste('It is not possible to detect a local maximum in the bar plot
   chunk2bisbis <- '
 **Spectral Density:**
 
-This method takes into account the spectral density and it is based on the fact that the period is the inverse of the frequency, it takes as period length the frequency that corresponds to the maximum value of spectral density. 
-
-We display the plot:'
+This method takes into account the spectral density and it is based on the fact that the period is the inverse of the frequency, it takes as period length the frequency that corresponds to the maximum value of spectral density.'
 ```
 
 `r if(period !=1) {chunk2bis}`
@@ -347,7 +345,7 @@ difference <- 0.01
 
 addOrMult <- function(addCoeff, multCoeff){
   if ((abs(addCoeff-multCoeff) <=  difference) & (nullPresence == FALSE) & (negativePresence == FALSE)){
-    res = paste0('In this case both autocorrelation coefficients are very **similar**. The additive one equals', round(addCoeff,3), ' and the multiplicative component equals', round(multCoeff,3), '. Choosing one is not an obvious task here so the rest of this report will display the solutions for both of the decompositions and the user can choose which one suits the problem best.' )
+    res = paste0('In this case both autocorrelation coefficients are very **similar**. The additive one equals ', round(addCoeff,3), ' and the multiplicative component equals', round(multCoeff,3), '. Choosing one is not an obvious task here so the rest of this report will display the solutions for both of the decompositions and the user can choose which one suits the problem best.' )
   }
   
   else{
@@ -586,7 +584,7 @@ if (aica > aicm){
 `r if((period !=1) & (typ == 'both')) {paste('Choosing a model type has not been possible with automatic tools, so the model with the lowest AIC is selected, which is ', lastType(aica, aicm), '.', sep = '')}`
 
 
-`r if(period !=1) {'The idea followed is to fit a Holt Winters smoothing as explained in the previous section in order to compute the residuals. The errors (the residuals) produced by taking the absolute value of the difference between the smoothing and the true values. Their distribution is below.'}`
+`r if(period !=1) {'The idea followed is to fit a Holt Winters smoothing as explained in the previous section in order to compute the residuals. The errors (i.e. the residuals) are calculated by taking the absolute value of the difference between the smoothing values and the true values. Their distribution is below.'}`
 
 ```{r, echo=FALSE, eval = ((period!=1) & (typ != 'both'))}
 #we use the ets function here in order to have the same predictions length
@@ -649,7 +647,8 @@ threshold <- quantile(residuals, 0.95)
 plot(as.vector(ts), main = 'Filtering with percentiles', type = 'l', xlab = 'Time', ylab = '')
 lines(1:length(ts), pred, col = 'red')
 points(which(residuals > threshold), ts[(residuals > threshold)], pch = 19, col = 'blue')
-legend('topleft', legend = c('Time Series', 'Prediction','Detected Anomaly'), col = c('black', 'red', 'blue'), lty = c(1, 1, 0), pch = c(NA, NA, 19))
+legend('topleft', legend = c('Time Series', 'Prediction','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue'), lty = c(1, 1, 0), pch = c(NA, NA, 19), inset = c(-0.05,-0.075), xpd = TRUE, horiz = TRUE)
+
 countAnomaliesPercentiles <- length(which(residuals > threshold))
 ```
 
@@ -673,7 +672,7 @@ lines(1:length(ts), ts, col = 'black')
 lines(1:length(ts), pred, col = 'red')
 points(which((ts < lower) | (ts> upper)), ts[(ts < lower) | (ts > upper)], pch = 19, col = 'blue')
 
-legend('topleft', legend = c('Time Series', 'Prediction','Confidence Interval','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue', NA), lty = c(1, 1, NA, NA), pch = c(NA, NA, 19, NA), density=c(0,0,0,NA), fill = c('black', 'red', 'blue', 'grey'), border = c(NA,NA,NA,"grey"), inset = c(-0.05,-0.1), xpd = TRUE, horiz = TRUE)
+legend('topleft', legend = c('Time Series', 'Prediction','Confidence Interval','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue', NA), lty = c(1, 1, NA, NA), pch = c(NA, NA, 19, NA), density=c(0,0,0,NA), fill = c('black', 'red', 'blue', 'grey'), border = c(NA,NA,NA,"grey"), inset = c(-0.15,-0.175), xpd = TRUE, horiz = FALSE)
 
 countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 ```
@@ -722,9 +721,13 @@ write(exportJson, "test.json")
 
 `r if(period !=1) {'### Annex: Use Cases'}`
 
-`r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length and the three smoothing parameters are used to perform a Holt Winters smoothing automatically, afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts. The code is available in two languages: R and Python'}` 
+`r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length and the three smoothing parameters are used to perform a Holt Winters smoothing automatically, afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
 
-`r if(period !=1) {'#### R'}`
+`r if(period !=1) {'The ts argument refers to the series we are analysing. It can be extrated from the present query by selecting the column specified in the title of the report.'}` 
+
+`r if(period !=1) {'The code is available in two languages: R and Python.'}` 
+
+`r if(period !=1) {'#### R Code'}`
 
 ```{r comment=NA, echo=FALSE, eval=(period!=1)}
 message('period <- ', period, '\nalpha <- ', hwinters$alpha, '\nbeta <- ', hwinters$beta,
@@ -740,7 +743,7 @@ total_table <- cbind(total_table, thresholdConfInt)
 colnames(total_table) <- c('trueValue', 'predictions', 'thresholdPercentile', 'thresholdConfInt')
 ```
 
-`r if(period !=1) {'#### Python'}`
+`r if(period !=1) {'#### Python Code'}`
 
 ```{r comment=NA, echo=FALSE, eval=(period!=1)}
 message('period = ', period, '\nalpha = ', hwinters$alpha, '\nbeta = ', hwinters$beta,
@@ -750,7 +753,7 @@ message('period = ', period, '\nalpha = ', hwinters$alpha, '\nbeta = ', hwinters
 
 ```{r, eval=FALSE}
 ets_model = ExponentialSmoothing(ts, trend='add', seasonal='add', 
-seasonal_periods=period_found)
+seasonal_periods=period)
 smoothing = ets_model.fit(smoothing_level=alpha, smoothing_slope=beta, smoothing_seasonal=gamma)
 
 percentileThreshold = total_table['thresholdPercentile']
@@ -761,6 +764,4 @@ total_table['thresholdPercentile'] = thresholdPercentile
 total_table['thresholdConfInt'] = thresholdConfInt
 ```
 
-
-`r if(period !=1) {'**TO-DO: ** Inyect the table generated back in DEVO!'}` 
 
