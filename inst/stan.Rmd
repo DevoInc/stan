@@ -415,7 +415,7 @@ plot(decompose(ts, type = 'multiplicative'))
 
 ```{r, echo=FALSE, eval=(period!=1)}
 plot(pacf(ts, plot = FALSE), main = paste('Partial Autocorrelations of the', name, 'series'))
-legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2)
+legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2, bty = "n")
 ```
 
 ```{r, echo=FALSE, eval=(period!=1)}
@@ -464,7 +464,7 @@ message(negativePresence)
 hwinters <- HoltWinters(ts, seasonal = typ)
 p <-predict(hwinters, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwinters, p, main = paste(typ, 'H-W smoothing'))
-legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1)
+legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1, bty = "n")
 
 
 if(typ == 'additive'){
@@ -509,7 +509,7 @@ t <- 'ZZA'
 hwA <- (HoltWinters(ts, seasonal = 'additive'))
 pA <-predict(hwA, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwA, pA, main ='Additive H-W smoothing')
-legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1)
+legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1, bty = "n")
 
 if (period > 24){
   #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
@@ -537,7 +537,7 @@ t <- 'ZZM'
 hwM <- (HoltWinters(ts, seasonal = 'multiplicative'))
 pM <-predict(hwM, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwM, pM, main = 'Multiplicative H-W smoothing')
-legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1)
+legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1, bty = "n")
 
 if (period > 24){
   #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
@@ -672,7 +672,7 @@ lines(1:length(ts), ts, col = 'black')
 lines(1:length(ts), pred, col = 'red')
 points(which((ts < lower) | (ts> upper)), ts[(ts < lower) | (ts > upper)], pch = 19, col = 'blue')
 
-legend('topleft', legend = c('Time Series', 'Prediction','Confidence Interval','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue', NA), lty = c(1, 1, NA, NA), pch = c(NA, NA, 19, NA), density=c(0,0,0,NA), fill = c('black', 'red', 'blue', 'grey'), border = c(NA,NA,NA,"grey"), inset = c(-0.2,-0.2), xpd = TRUE, horiz = FALSE)
+legend('topleft', legend = c('Time Series', 'Prediction','Confidence Interval','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue', NA), lty = c(1, 1, NA, NA), pch = c(NA, NA, 19, NA), density=c(0,0,0,NA), fill = c('black', 'red', 'blue', 'grey'), border = c(NA,NA,NA,"grey"), inset = c(-0.15,-0.25), xpd = TRUE, horiz = FALSE)
 
 countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 ```
