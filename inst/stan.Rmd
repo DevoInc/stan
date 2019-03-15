@@ -345,7 +345,7 @@ difference <- 0.01
 
 addOrMult <- function(addCoeff, multCoeff){
   if ((abs(addCoeff-multCoeff) <=  difference) & (nullPresence == FALSE) & (negativePresence == FALSE)){
-    res = paste0('In this case both autocorrelation coefficients are very **similar**. The additive one equals ', round(addCoeff,3), ' and the multiplicative component equals', round(multCoeff,3), '. Choosing one is not an obvious task here so the rest of this report will display the solutions for both of the decompositions and the user can choose which one suits the problem best.' )
+    res = paste0('In this case both autocorrelation coefficients are very **similar**. The additive one equals ', round(addCoeff,3), ' and the multiplicative component equals ', round(multCoeff,3), '. Choosing one is not an obvious task here so the rest of this report will display the solutions for both of the decompositions and the user can choose which one suits the problem best.' )
   }
   
   else{
@@ -647,7 +647,7 @@ threshold <- quantile(residuals, 0.95)
 plot(as.vector(ts), main = 'Filtering with percentiles', type = 'l', xlab = 'Time', ylab = '')
 lines(1:length(ts), pred, col = 'red')
 points(which(residuals > threshold), ts[(residuals > threshold)], pch = 19, col = 'blue')
-legend('topleft', legend = c('Time Series', 'Prediction','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue'), lty = c(1, 1, 0), pch = c(NA, NA, 19), inset = c(-0.05,-0.075), xpd = TRUE, horiz = TRUE)
+legend('topleft', legend = c('Time Series', 'Prediction','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue'), lty = c(1, 1, 0), pch = c(NA, NA, 19), inset = c(-0.05,-0.1), xpd = TRUE, horiz = TRUE)
 
 countAnomaliesPercentiles <- length(which(residuals > threshold))
 ```
@@ -672,7 +672,7 @@ lines(1:length(ts), ts, col = 'black')
 lines(1:length(ts), pred, col = 'red')
 points(which((ts < lower) | (ts> upper)), ts[(ts < lower) | (ts > upper)], pch = 19, col = 'blue')
 
-legend('topleft', legend = c('Time Series', 'Prediction','Confidence Interval','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue', NA), lty = c(1, 1, NA, NA), pch = c(NA, NA, 19, NA), density=c(0,0,0,NA), fill = c('black', 'red', 'blue', 'grey'), border = c(NA,NA,NA,"grey"), inset = c(-0.15,-0.175), xpd = TRUE, horiz = FALSE)
+legend('topleft', legend = c('Time Series', 'Prediction','Confidence Interval','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue', NA), lty = c(1, 1, NA, NA), pch = c(NA, NA, 19, NA), density=c(0,0,0,NA), fill = c('black', 'red', 'blue', 'grey'), border = c(NA,NA,NA,"grey"), inset = c(-0.2,-0.2), xpd = TRUE, horiz = FALSE)
 
 countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 ```
