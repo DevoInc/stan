@@ -645,7 +645,7 @@ threshold <- quantile(residuals, 0.95)
 `r if(period !=1) {'The results are ploted below, the blue points are the detected anomalies.'}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
-plot(as.vector(ts), main = 'Filtering with percentiles', type = 'l', xlab = 'Time', ylab = '')
+plot(as.vector(ts), main = 'Percentiles', type = 'l', xlab = 'Time', ylab = '')
 lines(1:length(ts), pred, col = 'red')
 points(which(residuals > threshold), ts[(residuals > threshold)], pch = 19, col = 'blue')
 legend('topleft', legend = c('Time Series', 'Prediction','Detected Anomaly'), bty = "n", col = c('black', 'red', 'blue'), lty = c(1, 1, 0), pch = c(NA, NA, 19), inset = c(-0.00,-0.125), xpd = TRUE, horiz = TRUE)
@@ -664,7 +664,7 @@ std_res <- sqrt(var(residuals))
 upper<- as.vector(pred + std_res * 1.96)
 lower<- as.vector(pred - std_res * 1.96)
 
-plot(1:length(ts), lower, type = 'n', main = 'Filtering with confidence intervals', xlab = 'Time', ylab = 'Series', ylim = c(min(min(lower), min(ts)), max(max(upper), max(ts))))
+plot(1:length(ts), lower, type = 'n', main = 'Confidence intervals', xlab = 'Time', ylab = 'Series', ylim = c(min(min(lower), min(ts)), max(max(upper), max(ts))))
 lines(1:length(ts), upper, col = 'grey')
 lines(1:length(ts), lower, col = 'grey')
 polygon(c(1:length(ts), rev(1:length(ts))), c(upper, rev(lower)),
