@@ -7,8 +7,8 @@ output:
     highlight: null
     css: styles.css
 params:
-  test: 'default'
-  query: 'default'
+  test: "dataframe"
+  query: "query"
 ---
 
 ```{r setup, include=FALSE}
@@ -123,6 +123,9 @@ message(period)
 <div class="fluid-row" id="headerTitle"><h1 class="title toc-ignore"><span>Time series for column:</span>&nbsp;<strong>`r name`</strong></h1></div>
 
 Mira ! `r print(params$query)`
+Mira ! `r params$query`
+
+Mira ! `r print(params[2])`
 
 ### Introduction
 
