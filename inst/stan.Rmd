@@ -8,6 +8,7 @@ output:
     css: styles.css
 params:
   test: 'default'
+  query: 'default'
 ---
 
 ```{r setup, include=FALSE}
@@ -120,6 +121,8 @@ message(period)
 ```
 
 <div class="fluid-row" id="headerTitle"><h1 class="title toc-ignore"><span>Time series for column:</span>&nbsp;<strong>`r name`</strong></h1></div>
+
+Mira ! `r print(params$query)`
 
 ### Introduction
 
