@@ -9,6 +9,8 @@ output:
 params:
   test: "dataframe"
   query: "query"
+  from: "from"
+  to: "to"
 ---
 
 ```{r setup, include=FALSE}
@@ -121,11 +123,6 @@ message(period)
 ```
 
 <div class="fluid-row" id="headerTitle"><h1 class="title toc-ignore"><span>Time series for column:</span>&nbsp;<strong>`r name`</strong></h1></div>
-
-Mira ! `r print(params$query)`
-Mira ! `r params$query`
-
-Mira ! `r print(params[2])`
 
 ### Introduction
 
@@ -686,89 +683,66 @@ countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 
 `r if(period !=1) {paste0('This technique has identified ', countAnomaliesConfidence, ' anomalous observations in the series.', sep = '')}`
 
-```{r, echo=FALSE, eval = FALSE}
-#We build the json object that contains all parameters necessary to the subsequent study.
-list1 <- vector(mode="list")
-list1[['period']] <- period
-list1[['pvalue']] <- pValue
-list1[['d']] <- my_lag
-list1[['p']] <- orderAR
-```
-
-```{r, echo=FALSE, eval = FALSE}
-#We build the json object that contains all parameters necessary to the subsequent study.
-list1[['type']] <- typ
-list1[['alpha']] <- round(hwinters$alpha, 4)
-list1[['beta']] <- round(hwinters$beta, 4)
-list1[['gamma']] <- round(hwinters$gamma, 4)
-list1[['thresholdPercentile']] <- threshold
-list1[['thresholdConfInt']] <- std_res
-```
-
-```{r, echo=FALSE, eval = FALSE}
-list1[['type']] <- typ
-list1[['alphaA']] <- round(hwA$alpha, 4)
-list1[['betaA']] <- round(hwA$beta, 4)
-list1[['gammaA']] <- round(hwA$gamma, 4)
-list1[['alphaM']] <- round(hwM$alpha, 4)
-list1[['betaM']] <- round(hwM$beta, 4)
-list1[['gammaM']] <- round(hwM$gamma, 4)
-list1[['chosenType']] <- lastType(aica, aicm)
-list1[['thresholdPercentile']] <- threshold
-list1[['thresholdConfInt']] <- std_res
-```
-
-```{r, echo=FALSE, eval = FALSE}
-exportJson <- toJSON(list1, pretty = TRUE)
-```
-
-```{r, echo=FALSE, eval=FALSE}
-write(exportJson, "test.json")
-```
 
 `r if(period !=1) {'### Annex: Use Cases'}`
 
-`r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length and the three smoothing parameters are used to perform a Holt Winters smoothing automatically, afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
+`r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length, the type of seasonality and the three smoothing parameters are used to perform a Holt Winters smoothing automatically, afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
 
-`r if(period !=1) {'The ts argument refers to the series we are analysing. It can be extrated from the present query by selecting the column specified in the title of the report.'}` 
+`r if(period !=1) {'The code is generated in Python. Data is extracted with the Devo SDK available on the GitHub account. The user must only fill in the public and secret keys.'}` 
 
-`r if(period !=1) {'The code is available in two languages: R and Python.'}` 
-
-`r if(period !=1) {'#### R Code'}`
 
 ```{r comment=NA, echo=FALSE, eval=(period!=1)}
-message('period <- ', period, '\nalpha <- ', hwinters$alpha, '\nbeta <- ', hwinters$beta,
-        '\ngamma <- ', hwinters$gamma, '\ntype <- ', t, '\nthresholdPercentile <- ', threshold,
-        '\nthresholdConfInt <- ', std_res)
+message('from devo.api import Client',
+'\nimport pandas as pd',
+'\nfrom statsmodels.tsa.api import ExponentialSmoothing',
+'\import numpy as np')
 ```
 
-```{r, eval=FALSE}
-smoothing <- ets(ts, alpha = alpha, beta = beta, gamma = gamma, model = t)
-total_table <- cbind(ts, smoothing$fitted)
-total_table <- cbind(total_table, thresholdPercentile)
-total_table <- cbind(total_table, thresholdConfInt)
-colnames(total_table) <- c('trueValue', 'predictions', 'thresholdPercentile', 'thresholdConfInt')
+```{r, echo=FALSE, eval=(period!=1)}
+myQ <- paste(params$query, 'select', name)
 ```
 
-`r if(period !=1) {'#### Python Code'}`
+```{r comment=NA, echo=FALSE, eval=(period!=1)}
+message('api = Client(key="fill me",',
+              '\nsecret="fill me",',
+              '\nurl="https://api-eu.logtrust.com/search/query",',
+              '\nuser="user@devo.com",',
+              '\napp_name="testing app"')
+
+message('response = api.query(query=',myQ ,',',
+                     '\ndates= {\'from\':', params$from, '\'to\':', params$to, '},',
+                     '\nresponse="csv",',
+                     '\nstream=False')
+
+message('string_list = [x.split(',') for x in response.splitlines()]',
+'\nnames = [\'cpuSys\']',
+'\ndf = pd.DataFrame(string_list, columns=names)',
+'\ndf = df.iloc[1:]',
+'\nts = pd.Series(data=df[\'cpuSys\'].tolist(), dtype=np.float)')
+```
+
+
+```{r, echo=FALSE, eval=(period!=1)}
+ty = 'add'
+if (t == 'ZZM'){
+  ty = 'mult'
+}
+```
 
 ```{r comment=NA, echo=FALSE, eval=(period!=1)}
 message('period = ', period, '\nalpha = ', hwinters$alpha, '\nbeta = ', hwinters$beta,
-        '\ngamma = ', hwinters$gamma, '\ntype = ', t, '\nthresholdPercentile = ', threshold,
+        '\ngamma = ', hwinters$gamma, '\ntype = ', ty, '\nthresholdPercentile = ', threshold,
         '\nthresholdConfInt = ', std_res)
 ```
 
-```{r, eval=FALSE}
-ets_model = ExponentialSmoothing(ts, trend='add', seasonal='add', 
-seasonal_periods=period)
-smoothing = ets_model.fit(smoothing_level=alpha, smoothing_slope=beta, smoothing_seasonal=gamma)
 
-percentileThreshold = total_table['thresholdPercentile']
-thresholdConfInf = total_table['thresholdConfInt']
-total_table= pd.concat([ts, smoothing.fittedvalues], axis = 1)
-total_table = total_table.rename(columns={'max_open_files': 'trueValue', 0: 'predictions'})
-total_table['thresholdPercentile'] = thresholdPercentile
-total_table['thresholdConfInt'] = thresholdConfInt
+```{r comment=NA, echo=FALSE, eval=(period!=1)}
+message('ets_model = ExponentialSmoothing(ts, seasonal_periods = period, seasonal= ty)',
+'\nsmoothing = ets_model.fit(smoothing_level = alpha, smoothing_slope = beta, smoothing_seasonal = gamma)',
+'\nresult_table = pd.concat([ts, smoothing.fittedvalues], axis = 1)',
+'\nresult_table = result_table.rename(columns={0: \'True Series\', 1: \'Smoothed Series\'})',
+'\nresult_table[\'thresholdPercentile\'] = thresholdPercentile',
+'\nresult_table[\'thresholdConfInt\'] = thresholdConfInt',
+'\nprint(result_table)')
 ```
-
 
