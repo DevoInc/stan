@@ -1,4 +1,4 @@
-render <- function(dataframe, dimensions) {
+render <- function(dataframe, dimensions, query) {
 
   colnames(dataframe) <- dimensions 
 
@@ -8,6 +8,6 @@ render <- function(dataframe, dimensions) {
 	# Render the markdwn
   rmarkdown::render("/usr/local/lib/opencpu/apps/ocpu_github_devoinc_stan/stan/stan.Rmd", output_file="output.html",
                     output_dir=getwd(),
-                    intermediates_dir=getwd(), params=list(test=dataframe), output_format="html_document");
+                    intermediates_dir=getwd(), params=list(test=dataframe, query=query), output_format="html_document");
   invisible();
 }
