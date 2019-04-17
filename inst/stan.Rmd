@@ -686,43 +686,14 @@ countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 
 `r if(period !=1) {'### Annex: Use Cases'}`
 
-`r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length, the type of seasonality and the three smoothing parameters are used to perform a Holt Winters smoothing automatically, afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
+`r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length, the type of seasonality and the three smoothing parameters are used to perform a Holt Winters smoothing automatically. Afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
 
-`r if(period !=1) {'The code is generated in Python. Data is extracted with the Devo SDK available on the GitHub account. The user must only fill in the public and secret keys.'}` 
+`r if(period !=1) {'The code is generated in Python and ready to use. Data is extracted with the Devo SDK publicly available on Devo's GitHub account. The user must only fill in the public and secret API keys.'}` 
 
-
-```{r comment=NA, echo=FALSE, eval=(period!=1)}
-message('from devo.api import Client',
-'\nimport pandas as pd',
-'\nfrom statsmodels.tsa.api import ExponentialSmoothing',
-'\nimport numpy as np')
-```
 
 ```{r, echo=FALSE, eval=(period!=1)}
 myQ <- paste(params$query, 'select', name)
-```
 
-```{r comment=NA, echo=FALSE, eval=(period!=1)}
-message('api = Client(key="fill me",',
-              '\nsecret="fill me",',
-              '\nurl="https://api-eu.logtrust.com/search/query",',
-              '\nuser="user@devo.com",',
-              '\napp_name="testing app"')
-
-message('response = api.query(query=',myQ ,',',
-                     '\ndates= {\'from\':', params$from, '\'to\':', params$to, '},',
-                     '\nresponse="csv",',
-                     '\nstream=False')
-
-message('string_list = [x.split(',') for x in response.splitlines()]',
-'\nnames = [\'cpuSys\']',
-'\ndf = pd.DataFrame(string_list, columns=names)',
-'\ndf = df.iloc[1:]',
-'\nts = pd.Series(data=df[\'cpuSys\'].tolist(), dtype=np.float)')
-```
-
-
-```{r, echo=FALSE, eval=(period!=1)}
 ty = 'add'
 if (t == 'ZZM'){
   ty = 'mult'
@@ -730,14 +701,33 @@ if (t == 'ZZM'){
 ```
 
 ```{r comment=NA, echo=FALSE, eval=(period!=1)}
+message('from devo.api import Client',
+'\nimport pandas as pd',
+'\nfrom statsmodels.tsa.api import ExponentialSmoothing',
+'\nimport numpy as np')
+
+message('api = Client(key="fill me",',
+              '\n              secret="fill me",',
+              '\n              url="https://api-eu.logtrust.com/search/query",',
+              '\n              user="user@devo.com",',
+              '\n              app_name="testing app"')
+
+message('response = api.query(query=',myQ ,',',
+                     '\n                     dates= {\'from\':', params$from, '\'to\':', params$to, '},',
+                     '\n                     response="csv",',
+                     '\n                     stream=False')
+
+message('string_list = [x.split(',') for x in response.splitlines()]',
+'\nnames = [\'', name ,'\']',
+'\ndf = pd.DataFrame(string_list, columns=names)',
+'\ndf = df.iloc[1:]',
+'\nts = pd.Series(data=df[\'', name ,'\'].tolist(), dtype=np.float)')
+
 message('period = ', period, '\nalpha = ', hwinters$alpha, '\nbeta = ', hwinters$beta,
         '\ngamma = ', hwinters$gamma, '\ntype = ', ty, '\nthresholdPercentile = ', threshold,
         '\nthresholdConfInt = ', std_res)
-```
 
-
-```{r comment=NA, echo=FALSE, eval=(period!=1)}
-message('ets_model = ExponentialSmoothing(ts, seasonal_periods = period, seasonal= ty)',
+message('ets_model = ExponentialSmoothing(ts, seasonal_periods = period, seasonal= type)',
 '\nsmoothing = ets_model.fit(smoothing_level = alpha, smoothing_slope = beta, smoothing_seasonal = gamma)',
 '\nresult_table = pd.concat([ts, smoothing.fittedvalues], axis = 1)',
 '\nresult_table = result_table.rename(columns={0: \'True Series\', 1: \'Smoothed Series\'})',
