@@ -695,7 +695,7 @@ countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 message('from devo.api import Client',
 '\nimport pandas as pd',
 '\nfrom statsmodels.tsa.api import ExponentialSmoothing',
-'\import numpy as np')
+'\nimport numpy as np')
 ```
 
 ```{r, echo=FALSE, eval=(period!=1)}
