@@ -136,6 +136,9 @@ This time series represents the evolution of the number of `r name`.
 plot(ts, ylab = name)
 ```
 
+Mira! `r params$from`
+Mira! `r params$to`
+
 It contains `r length(ts)` observations, going from `r as.POSIXct(params$from / 1000, origin="1970-01-01")` to `r as.POSIXct(params$to / 1000, origin="1970-01-01")`. 
 
 ```{r, echo = FALSE, eval = (constant == TRUE)}
