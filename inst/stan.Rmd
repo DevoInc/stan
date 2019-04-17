@@ -746,7 +746,7 @@ message('#Doing smoothing',
 '\nresult_table[\'thresholdConfInt\'] = thresholdConfInt',
 '\nresult_table[\'alertPercentile\'] = np.where(abs(result_table[\'True Series\'] - result_table[\'Smoothed Series\']) > result_table[\'thresholdPercentile\'], \'1\', \'0\')',
 '\nresult_table[\'alertConfInt\'] = np.where((result_table[\'True Series\'] < (result_table[\'Smoothed Series\'] - result_table[\'thresholdConfInt\'] * 1.96)), \'1\', \'0\')',
-'\nresult_table[\'alertConfInt\'] = np.where((result_table[\'True Series\'] > (result_table[\'Smoothed Series\'] + result_table[\'thresholdConfInt\'] * 1.96)), \'1\', \'0\')')
+'\nresult_table[\'alertConfInt\'] = np.where((result_table[\'True Series\'] > (result_table[\'Smoothed Series\'] + result_table[\'thresholdConfInt\'] * 1.96)), \'1\', \'0\')',
 '\nprint(result_table)')
 
 message('#Inject back into Devo\'s platform',
