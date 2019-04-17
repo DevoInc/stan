@@ -688,7 +688,7 @@ countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 
 `r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length, the type of seasonality and the three smoothing parameters are used to perform a Holt Winters smoothing automatically. Afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
 
-`r if(period !=1) {'The code is generated in Python and ready to use. Data is extracted with the Devo SDK publicly available on Devo\'s GitHub account. The user must only fill in the public and secret API keys.'}` 
+`r if(period !=1) {'The code is generated in Python and ready to use. Data is extracted with the Devo SDK publicly available on Devo GitHub account. The user must only fill in the public and secret API keys.'}` 
 
 
 ```{r, echo=FALSE, eval=(period!=1)}
