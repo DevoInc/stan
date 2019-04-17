@@ -688,7 +688,7 @@ countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 
 `r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length, the type of seasonality and the three smoothing parameters are used to perform a Holt Winters smoothing automatically. Afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
 
-`r if(period !=1) {'The code is generated in Python and ready to use. Data is extracted with the Devo SDK publicly available on Devo\'s GitHub account ([link here](https://github.com/DevoInc/python-sdk)). The user must only fill in the public and secret API keys.'}` 
+`r if(period !=1) {'The code is generated in Python and ready to use. Data is extracted with the Devo SDK publicly available on Devo\'s GitHub account (https://github.com/DevoInc/python-sdk). The user must only fill in the public and secret API keys.'}` 
 
 
 ```{r, echo=FALSE, eval=(period!=1)}
@@ -713,7 +713,7 @@ message('#Extracting data from Devo',
               '\n              secret="fill me!",',
               '\n              url="https://api-eu.logtrust.com/search/query",',
               '\n              user="user@devo.com",',
-              '\n              app_name="testing app"',
+              '\n              app_name="testing app")',
 '\n',
 '\nresponse = api.query(query= "',myQ ,'",',
               '\n                     dates= {\'from\': "', params$from, '", \'to\': "', params$to, '"},',
@@ -732,13 +732,16 @@ message('#Parameters calculated in the report',
         '\ngamma = ', hwinters$gamma, '\ntype = "', ty, '"\nthresholdPercentile = ', threshold,
         '\nthresholdConfInt = ', std_res)
 
-message('#Doing smoothing and defining alerts',
+message('#Doing smoothing',
 '\nets_model = ExponentialSmoothing(ts, seasonal_periods = period, seasonal= type)',
 '\nsmoothing = ets_model.fit(smoothing_level = alpha, smoothing_slope = beta, smoothing_seasonal = gamma)',
 '\nresult_table = pd.concat([ts, smoothing.fittedvalues], axis = 1)',
 '\nresult_table = result_table.rename(columns={0: \'True Series\', 1: \'Smoothed Series\'})',
+'\n',
+'\n#Defining alerts',
 '\nresult_table[\'thresholdPercentile\'] = thresholdPercentile',
 '\nresult_table[\'thresholdConfInt\'] = thresholdConfInt',
+
 '\nprint(result_table)')
 
 message('#Inject back into Devo\'s platform',
