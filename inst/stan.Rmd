@@ -706,16 +706,16 @@ message('from devo.api import Client',
 '\nfrom statsmodels.tsa.api import ExponentialSmoothing',
 '\nimport numpy as np')
 
-message('api = Client(key="fill me",',
-              '\n              secret="fill me",',
+message('api = Client(key="fill me!",',
+              '\n              secret="fill me!",',
               '\n              url="https://api-eu.logtrust.com/search/query",',
               '\n              user="user@devo.com",',
-              '\n              app_name="testing app"')
+              '\n              app_name="testing app")')
 
-message('response = api.query(query=',myQ ,',',
-                     '\n                     dates= {\'from\':', params$from, '\'to\':', params$to, '},',
+message('response = api.query(query= "',myQ ,'",',
+                     '\n                     dates= {\'from\': "', params$from, '", \'to\': "', params$to, '"},',
                      '\n                     response="csv",',
-                     '\n                     stream=False')
+                     '\n                     stream=False)')
 
 message('string_list = [x.split(',') for x in response.splitlines()]',
 '\nnames = [\'', name ,'\']',
@@ -724,7 +724,7 @@ message('string_list = [x.split(',') for x in response.splitlines()]',
 '\nts = pd.Series(data=df[\'', name ,'\'].tolist(), dtype=np.float)')
 
 message('period = ', period, '\nalpha = ', hwinters$alpha, '\nbeta = ', hwinters$beta,
-        '\ngamma = ', hwinters$gamma, '\ntype = ', ty, '\nthresholdPercentile = ', threshold,
+        '\ngamma = ', hwinters$gamma, '\ntype = "', ty, '"\nthresholdPercentile = ', threshold,
         '\nthresholdConfInt = ', std_res)
 
 message('ets_model = ExponentialSmoothing(ts, seasonal_periods = period, seasonal= type)',
