@@ -688,7 +688,12 @@ countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 
 `r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length, the type of seasonality and the three smoothing parameters are used to perform a Holt Winters smoothing automatically. Afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
 
-`r if(period !=1) {'The code is generated in Python and ready to use. Data is extracted with the Devo SDK publicly available on Devo\'s GitHub account (https://github.com/DevoInc/python-sdk). The user must only fill in the public and secret API keys.'}` 
+```{r, echo=FALSE, eval=(period!=1)}
+#link <- as.character('<style=\'nolink\'>http<!-- -->://github.com/DevoInc/python-sdk</style>')
+link <- as.character('http://<span></span>github.com/DevoInc/python-sdk')
+```
+
+`r if(period !=1) {paste0('The code is generated in Python and ready to use. Data is extracted with the Devo SDK publicly available on Devo\'s GitHub account (', link,'). The user must only fill in the public and secret API keys.')}` 
 
 
 ```{r, echo=FALSE, eval=(period!=1)}
@@ -710,10 +715,10 @@ message('#Importing modules',
 
 message('#Extracting data from Devo',
 '\napi = Client(key="fill me!",',
-              '\n              secret="fill me!",',
-              '\n              url="https://api-eu.logtrust.com/search/query",',
-              '\n              user="user@devo.com",',
-              '\n              app_name="testing app")',
+              '\n             secret="fill me!",',
+              '\n             url="https://api-eu.logtrust.com/search/query",',
+              '\n             user="user@devo.com",',
+              '\n             app_name="testing app")',
 '\n',
 '\nresponse = api.query(query= "',myQ ,'",',
               '\n                     dates= {\'from\': "', params$from, '", \'to\': "', params$to, '"},',
