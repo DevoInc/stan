@@ -690,7 +690,7 @@ countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 
 ```{r, echo=FALSE, eval=(period!=1)}
 #link <- as.character('<style=\'nolink\'>http<!-- -->://github.com/DevoInc/python-sdk</style>')
-link <- as.character('<span></span>http://github.com/DevoInc/python-sdk')
+link <- as.character('http://<span></span>github.com/DevoInc/python-sdk')
 ```
 
 `r if(period !=1) {paste0('The code is generated in Python and ready to use. Data is extracted with the Devo SDK publicly available on Devo\'s GitHub account (', link,'). The user must only fill in the public and secret API keys.')}` 
@@ -709,6 +709,7 @@ if (t == 'ZZM'){
 ```{r comment=NA, echo=FALSE, eval=(period!=1)}
 message('#Importing modules',
 '\nfrom devo.api import Client',
+'\nfrom devo.sender import Sender',
 '\nimport pandas as pd',
 '\nfrom statsmodels.tsa.api import ExponentialSmoothing',
 '\nimport numpy as np')
@@ -752,5 +753,9 @@ message('#Doing smoothing',
 '\nprint(result_table)')
 
 message('#Inject back into Devo\'s platform',
-'\nDo stuff!')
+#The address depends on the cloud you are in, fill with collector-eu.devo.io for Europe and with collector-us.devo.io for the US',
+'\ncon = Sender.from_config({"address": "fill me!", "port": 443, "key": "fill me!", "cert": "fill me!", "chain": "also...fill me!"})',
+'\n#fill the tag with the appropiate Devo tag for the table you want to fill',
+'\nfor index, row in result_table.iterrows():',
+'\n    con.send(tag="fill me!", msg=row[i])')
 ```
