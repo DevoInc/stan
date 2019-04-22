@@ -690,7 +690,7 @@ countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 
 ```{r, echo=FALSE, eval=(period!=1)}
 #link <- as.character('<style=\'nolink\'>http<!-- -->://github.com/DevoInc/python-sdk</style>')
-link <- as.character('http://<span></span>github.com/DevoInc/python-sdk')
+link <- as.character('<span></span>http://github.com/DevoInc/python-sdk')
 ```
 
 `r if(period !=1) {paste0('The code is generated in Python and ready to use. Data is extracted with the Devo SDK publicly available on Devo\'s GitHub account (', link,'). The user must only fill in the public and secret API keys.')}` 
