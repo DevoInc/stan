@@ -753,11 +753,10 @@ message('#Doing smoothing',
 '\nprint(result_table)')
 
 message('#Inject back into Devo\'s platform',
-'\nfrom devo.sender import Sender',
 '\ncon = Sender.from_config({"address": "fill me!", "port": 443, "key": "fill me!", "cert": "fill me!", "chain": "also...fill me!"})',
 '\nsending_table = result_table.to_string(header=False,',
                    '\n                    index=False,',
-                   "\n                    index_names=False).split('\n')",
+                   "\n                    index_names=False).split('\\n')",
 '\nfor i in range(len(sending_table)):',
 '\n    con.send(tag="fill me!", msg=sending_table[i])')
 ```
