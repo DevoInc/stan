@@ -126,11 +126,11 @@ message(period)
 
 ### Introduction
 
-A report describing the series as thoroughly as possible is generated thereafter. The aim of this report is to extract key information about the series so that the user can take good decisions about his data. The report analyses the series and starts by performing simple transformations and then does more advanced checks. The ultimate goal of this functionnality is to automatically define alert thresholds in order to answer anomaly detection problematics. In the annex of this report there is a use case where the parameters extracted in the report are used to perform time series smoothing and to automatically detect anomalies. This report will ultimately be used for defining alerts in a simple and intuitive way.
+This report describes the series as thoroughly as possible and aims to extract key information about the series so that the user can take informed decisions about the data. The report starts with some simple transformations and later offers more advanced checks. The goal of this functionality is to automatically define alert thresholds in order to enable anomaly detection. The annex of this report describes a use case in which the parameter values extracted in the report are used to perform time series smoothing and automatically detect anomalies. 
 
 ### 1) Descriptive Analysis and Missing Values 
 
-This time series represents the evolution of the number of `r name`. 
+This time series represents the evolution of the value of `r name`. 
 
 ```{r, echo = FALSE}
 plot(ts, ylab = name)
@@ -149,7 +149,7 @@ my_lag <- 1
 nas <- sum(is.na(ts))
 
 if(nas == 0){
-  chunki <- 'This time series does **not** contain any **missing values**, thus there is no need to make any interpolation.'
+  chunki <- 'This time series is **not** missing any values, thus there is no need to interpolate.'
 }
 
 if (nas != 0){
@@ -179,18 +179,17 @@ mean_ts <- round(mean(ts), 3)
 
 ```{r, echo=FALSE, eval=(constant == FALSE)}
 if(period == 1){
-  chunk2 <- 'The period length is estimated with the **spectral density** technique and the result suggests that there is not a clear period in the time series. Unfortunately, nothing more can be said when the series is non-periodic so the report ends up here.'
+  chunk2 <- 'The period length is estimated with the **spectral density** technique and the result suggests that there is not a clear period. Unfortunately, nothing more can be said when the series is non-periodic and so the report ends up here.'
 }
 
 if (period !=1){
-  chunk2 <- 'In order to tackle the problem of period length detection two different techniques are used: one with autocorrelation and one with the spectral density.
+  chunk2 <- 'In order to estimate the period length, we apply two techniques: autocorrelation and spectral density.
 
 **Autocorrelation:**
 
-The autocorrelation of the original series with a lagged version of itself is calculated in order to get a candidate for the period length. The period length is defined as the lag index of the first local maximum in the autocorrelation plot.
+This technique correlates the original series with a lagged version of itself to calculate the period length. The period length is defined as the lag index of the first local maximum in the autocorrelation plot.
 
-The calculated coefficients are below:
-'
+The calculated coefficients are shown below:'
   
 }
 pValue = 0
@@ -221,7 +220,7 @@ chunk2bis <- paste('It is not possible to detect a local maximum in the bar plot
   chunk2bisbis <- '
 **Spectral Density:**
 
-This method takes into account the spectral density and it is based on the fact that the period is the inverse of the frequency, it takes as period length the frequency that corresponds to the maximum value of spectral density.'
+This technique considers the spectral density of the time series and is based on the fact that the period is the inverse of the frequency. The period length is the frequency that corresponds to the peak value of spectral density.'
 ```
 
 `r if(period !=1) {chunk2bis}`
@@ -233,7 +232,7 @@ This method takes into account the spectral density and it is based on the fact 
 plot(spec.ar(ts, plot = FALSE), main = paste('Spectral Density of', name), ylab = 'Spectral Density')
 ```
 
-`r if (period != 1) {paste('This method returns a period of length ', period, '. Recent studies have found, empirically, that in practice, this method performs better than the previous one. The result obtained with this method is kept for the future.', sep = '')}`
+`r if (period != 1) {paste('This method returns a period of length ', period, '. Recent empirical studies have found that this method performs better than autocorrelation. Therefore, we will use this result in future calculations.', sep = '')}`
 
 `r if(period !=1) {'### 3) Checking stationarity'}`
 
@@ -257,7 +256,7 @@ not stationary). The alternative hypothesis is stationarity of the series. At a 
 
 differentiating <- function(pValue){
     if (pValue < 0.05){
-      return ('The is no need to differentiate the series. Subsequently, if an ARIMA(p,d,q) model is fitted, the d parameter that stands for the degree of differenciating will be equal to 0.')
+      return ('The is no need to difference the time series. If an ARIMA(p,d,q) model were fitted, the d parameter that represents the degree of differencing would be equal to 0.')
     }
   else{
     return ('A way to make a series stationary is to differenciate it a certain number of times. The lagging of the series starts at level 1 and the lagging parameter is increased until the series is stationary.')
@@ -307,7 +306,7 @@ if (sum(ts < 0) != 0){
 ```
 
 
-`r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {'Time series decomposition is a powerful statistical method that decomposes a signal into several components (a trend, a periodic and a random component). This decomposition allows the user to isolate the seasonal component and make two decompositions: one with the additive assumption and one with the multiplicative one. This is done in order to check how much correlation between data points is still encoded within the residuals. The model with the lesser amount of autocorrelation in the random component is preferable as this will mean that the chosen model encapsulates as much information as possible.'}`
+`r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {'Decomposition is a powerful statistical method that deconstructs a time series into several components (a trend, a periodic and a random component). In order to determine which decomposition model, additive or multiplicative, is more appropriate for the series we make two decompositions: one with the additive assumption and one with the multiplicative one. This is done in order to check how much correlation between data points is still encoded within the residuals. The autocorrelation that results in a lower coefficient will indicate a better fit and thus which decomposition model to apply.'}`
 
 
 ```{r, echo = F, warning = F, message = F}
@@ -321,7 +320,7 @@ message(negativePresence)
 
 `r if(period !=1 & negativePresence == TRUE & nullPresence == FALSE){'The time series contains values that are negative. Thus, it makes more sense to use an **additive model**.'}`
 
-`r if(period !=1 & negativePresence == TRUE & nullPresence == TRUE){'The time series contains values that are equal to 0 and also values that are below zero. This means that a multiplicative model is not possible. The reason behind this is because in a multiplicative model the trend is calculated as division of two data points and thus a zero value is forbidden. Instead the **additive model** uses the substraction of data points and so it is used in this case.'}`
+`r if(period !=1 & negativePresence == TRUE & nullPresence == TRUE){'The time series contains values that are equal to 0 and also values that are below zero. This means that a multiplicative model is not possible. The reason behind this is because in a multiplicative model the trend is calculated as a division of two data points and thus a zero value is forbidden. Instead the **additive model** uses the substraction of data points and so it is used in this case.'}`
 
 `r if(period !=1 & nullPresence == FALSE & negativePresence == FALSE) {'The respective autocorrelations are plotted below:'}`
 
@@ -348,16 +347,16 @@ difference <- 0.01
 
 addOrMult <- function(addCoeff, multCoeff){
   if ((abs(addCoeff-multCoeff) <=  difference) & (nullPresence == FALSE) & (negativePresence == FALSE)){
-    res = paste0('In this case both autocorrelation coefficients are very **similar**. The additive one equals ', round(addCoeff,3), ' and the multiplicative component equals ', round(multCoeff,3), '. Choosing one is not an obvious task here so the rest of this report will display the solutions for both of the decompositions and the user can choose which one suits the problem best.' )
+    res = paste0('In this case, both autocorrelation coefficients are very **similar**. The additive one equals ', round(addCoeff,3), ' and the multiplicative component equals ', round(multCoeff,3), '. Choosing one is not an obvious task, so the rest of this report will display the solutions for both of the decompositions and the user can choose which one suits his problem best.' )
   }
   
   else{
     if (addCoeff < multCoeff){
-    res = paste0('In this case the autocorrelation coefficient of the additive model (',round(addCoeff,3), ') is lesser than the multiplicative (',round(multCoeff,3),') so the conclusion is that fitting an **additive model** is more accurate.')
+    res = paste0('In this case, the autocorrelation coefficient of the additive model (',round(addCoeff,3), ') is lesser than the multiplicative (',round(multCoeff,3),'), so we conclude that fitting an **additive model** is more accurate.')
     }
 
     else{
-    res = paste0('In this case the autocorrelation coefficient of the multiplicative model (',round(multCoeff,3),') is lesser than the additive (',round(addCoeff,3),') so the conclusion is that fitting a **multiplicative model** is more accurate.');
+    res = paste0('In this case, the autocorrelation coefficient of the multiplicative model (',round(multCoeff,3),') is lesser than the additive (',round(addCoeff,3),'), so we conclude that fitting a **multiplicative model** is more accurate.');
     }
   }
   return (res)
@@ -388,7 +387,7 @@ typ <- 'additive'
 
 `r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {addOrMult(acfAdd, acfMult)}`
 
-`r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {'Now that the type of seasonality has been identified, the series can be decomposed'}`
+`r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {'Now that we’ve identified the seasonality type, we can decompose the series.'}`
 
 ```{r, echo = F, warning = F, message = F}
 message('aqui')
@@ -414,7 +413,7 @@ plot(decompose(ts, type = 'multiplicative'))
 
 `r if(period !=1) {'### 5) Detecting the order of the Autoregressive process'}`
 
-`r if(period !=1) {'It is also interesting to check the **partial autocorrelations** plot in order to have better insights on the relationship between the observations. Briefly, the partial autocorrelation at lag k is the correlation that results after removing the effect of any correlations due to the terms at shorter lags. Partial Autocorrelation plots are a commonly used for identifying the order of an autoregressive process AR(p). The order p is selected as the last lag that was statistically significant.'}`
+`r if(period !=1) {'The partial autocorrelation function is useful for gaining insights on the relationship between the observations. Briefly, the partial autocorrelation at lag k is the correlation that results after removing the effect of any correlations due to the terms at shorter lags. Partial Autocorrelation is commonly used for identifying the order of an autoregressive process AR(p). The order p is identified as the last lag that was statistically significant.'}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
 plot(pacf(ts, plot = FALSE), main = paste('Partial Autocorrelations of the', name, 'series'))
@@ -437,19 +436,19 @@ findOrder <- function(pacf){
 orderAR <- findOrder(pacf(ts, plot = FALSE))
 ```
 
-`r if(period !=1) {paste('The above plot shows that after the lag number ', orderAR, ' the values are no longer significative. That\'s why the underlying Auto Regressive process should be of order ', orderAR,'.', sep = '')}`
+`r if(period !=1) {paste('The plot shows that after the lag number ', orderAR, ' the values are no longer significant. That\'s why the underlying Auto Regressive process should be of order ', orderAR,'.', sep = '')}`
 
 `r if(period !=1) {'### 6) Exponential Smoothing'}`
 
-`r if(period !=1) {'In this section, the **Holt Winters** technique is applied to the series. Also called triple exponential smoothing, this method consists on smoothing the three components of our series.  It is also used to predict some points ahead into the future and to filter anomalies (if any).'}`
+`r if(period !=1) {'In this section, the **Holt Winters** triple exponential smoothing technique is applied to the time series. This method consists of smoothing the three components of our series. It is also used to predict some points ahead into the future and to filter anomalies (if any).'}`
 
-`r if(period !=1 & typ != 'both') {paste('The type of the smoothing is ', type(acfAdd, acfMult),' as it has already been detected in section 4). Predictions are made for two periods into the future, this means predicting ', period * 2 , ' points. After fitting the model, computing indicators of the goodness-of-fit is crucial. The AIC and the BIC are computed in this report. The indicators alone do not provide much information but they are useful for a future model comparison/selection.', sep = '')}`
+`r if(period !=1 & typ != 'both') {paste('As the seasonality was identified in section 4 as ', type(acfAdd, acfMult),', we apply the corresponding formala. Predictions are made for two periods into the future, in this case we are predicting ', period * 2 , ' points. After fitting the model, it is crucial to calculate goodness-of-fit indicators. The AIC and the BIC are computed in this report. The indicators alone do not provide much information but they are useful for a future model comparison/selection.', sep = '')}`
 
-`r if(period !=1 & typ == 'both') {paste('There wasn\'t a clear decomposition type in section 4) so exponential smoothing for both models is carried out. Predictions are made for two periods into the future, this means predicting ', period * 2 , ' points. After fitting the model, computing indicators of the goodness-of-fit is crucial. The AIC and the BIC are computed in this report. The indicators alone do not provide much information but they are useful for a future model comparison/selection.', sep = '')}`
+`r if(period !=1 & typ == 'both') {paste('There wasn\'t a clear decomposition type in section 4 so exponential smoothing for both models is made. Predictions are made for two periods into the future, in this case we are predicting ', period * 2 , ' points. After fitting the model, it is crucial to calculate goodness-of-fit indicators. The AIC and the BIC are computed in this report. The indicators alone do not provide much information but they are useful for a future model comparison/selection.', sep = '')}`
 
 `r if(period !=1) {'The **AIC** (Akaike Information Criterion) is an estimator of the relative quality of a model for a given set of data. Given a set of candidate models for the data, the preferred model is the one with the minimum AIC value. Thus, AIC rewards goodness of fit (as assessed by the likelihood function), but it also includes a penalty that is an increasing function of the number of estimated parameters. The penalty discourages overfitting, because increasing the number of parameters in the model almost always improves the goodness of the fit.'}`
 
-`r if(period !=1) {'On the other hand, the **BIC** (Bayesian Information Criterion) indicator resemble the AIC (the lower the better) but with a penalty term larger than in AIC.'}`
+`r if(period !=1) {'The **BIC** (Bayesian Information Criterion) indicator resembles the AIC (the lower the better) but with a penalty term larger than in AIC.'}`
 
 ```{r, echo = F, warning = F, message = F}
 message('period')
@@ -505,7 +504,7 @@ if (period <= 24){
 
 ```
 
-`r if((period !=1) & (typ != 'both')){paste('In this case, the AIC is equal to ', round(aic,3),' and the BIC equals ', round(bic,3), '. These indicators can be useful in a future model selection.', sep = '')}`
+`r if((period !=1) & (typ != 'both')){paste('In this case, the AIC value is ', round(aic,3),' and the BIC value is ', round(bic,3), '. These indicators can be useful in model selection.', sep = '')}`
 
 ```{r, echo=FALSE, eval=((period != 1) & (typ == 'both')), warning=FALSE}
 t <- 'ZZA'
@@ -533,7 +532,7 @@ if (period <= 24){
 
 `r if((period !=1) & (typ == 'both')){paste('The **Nelder-Mead** optimization method is used in order to find the optimal values for the smoothing parameters. The results are: alpha = ', round(hwA$alpha, 4), ', beta = ', round(hwA$beta, 3), ' and gamma = ' , round(hwA$gamma, 3), '.', sep = '')}`
 
-`r if((period !=1) & (typ == 'both')){paste('In the additive case, the AIC is equal to ', round(aica,3),' and the BIC equals ', round(bic,3), '. These indicators can be useful in a future model selection.', sep = '')}`
+`r if((period !=1) & (typ == 'both')){paste('In the additive case, the AIC value is ', round(aica,3),' and the BIC value is ', round(bic,3), '. These indicators can be useful in model selection.', sep = '')}`
 
 ```{r, echo=FALSE, eval=((period != 1) & (typ == 'both')), warning=FALSE}
 t <- 'ZZM'
@@ -562,12 +561,12 @@ if (period <= 24){
 
 `r if((period !=1) & (typ == 'both')){paste('The **Nelder-Mead** optimization method is used in order to find the optimal values for the smoothing parameters. The results are: alpha = ',round(hwM$alpha, 4), ', beta = ', round(hwM$beta, 3), ' and gamma = ' , round(hwM$gamma, 3), '.', sep = '')}`
 
-`r if((period !=1) & (typ == 'both')){paste('In the multiplicative case, the AIC is equal to ', round(aicm,3),' and the BIC equals ', round(bic,3), '. These indicators can be useful in a future model selection.', sep = '')}`
+`r if((period !=1) & (typ == 'both')){paste('In the multiplicative case, the AIC value is ', round(aicm,3),' and the BIC value is ', round(bic,3), '. These indicators can be useful in model selection.', sep = '')}`
 
 
 `r if(period !=1) {'### 7) Filtering Anomalies'}`
 
-`r if(period !=1) {'For this matter, two different techniques are proposed in this report: percentiles and confidence intervals.'}`
+`r if(period !=1) {'This report uses two techniques to identify possible anomalies: percentiles and confidence intervals.'}`
 
 ```{r, echo=FALSE, eval = (period !=1) & (typ == 'both')}
 lastType <- function(aica, aicm){
@@ -585,10 +584,10 @@ if (aica > aicm){
 }
 ```
 
-`r if((period !=1) & (typ == 'both')) {paste('Choosing a model type has not been possible with automatic tools, so the model with the lowest AIC is selected, which is ', lastType(aica, aicm), '.', sep = '')}`
+`r if((period !=1) & (typ == 'both')) {paste('Choosing a model type has not been possible with automatic tools, so the model with the lowest AIC is selected, which in this case is ', lastType(aica, aicm), '.', sep = '')}`
 
 
-`r if(period !=1) {'The idea followed is to fit a Holt Winters smoothing as explained in the previous section in order to compute the residuals. The errors (i.e. the residuals) are calculated by taking the absolute value of the difference between the smoothing values and the true values. Their distribution is below.'}`
+`r if(period !=1) {'First, we fit the Holt Winters smoothing model explained in the previous section in order to compute the residuals, or errors, by taking the absolute value of the difference between the smoothing values and the true values. This distribution is plotted as a histogram below.'}`
 
 ```{r, echo=FALSE, eval = ((period!=1) & (typ != 'both'))}
 #we use the ets function here in order to have the same predictions length
@@ -633,19 +632,20 @@ residuals<- abs(ts - pred)
 hist(residuals, breaks = 50, main = 'Distribution of the residuals')
 ```
 
-`r if(period !=1) {'There is no normality assumption when fitting an exponential smoothing nor when producing confidence intervals, so a bell shaped histogram is not necessary.'}`
+`r if(period !=1) {'There is no normality assumption when fitting an exponential smoothing or when producing confidence intervals, so there is no requirement for the histogram to be bell-shaped.'}`
 
 `r if(period !=1) {'**Using percentiles: **'}`
 
-`r if(period !=1) {'This technique uses percentiles to determine which errors are too big to be considered normal. This is based on the heuristic that the values not explained by the model are anomalies. The 95 percentile is chosen for now but this can be set as a parameter in future versions.'}`
+`r if(period !=1) {'Now we use the percentiles technique to identify anomalies based on the smoothed model.
+This technique is founded on the heuristic that any values not explained by the model are anomalies. In this report, the 95th percentile is fixed as the threshold for normality, but this percentile will be a variable in future versions. '}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
 threshold <- quantile(residuals, 0.95)
 ```
 
-`r if(period !=1) {paste0('In brief, the points that produced residual errors that are beyond the 95 percentile will be taken as anomalies, this corresponds to the value ', round(threshold, 3), '. This means that an anomaly is found when the difference between the series and the smoothing is greater than the threshold value.', sep = '')}`
+`r if(period !=1) {paste0('Any data points that produced residual errors beyond the 95th percentile (which corresponds to the value ', round(threshold, 3), 'are identified as anomalies.', sep = '')}`
 
-`r if(period !=1) {'The results are ploted below, the blue points are the detected anomalies.'}`
+`r if(period !=1) {'The results are plotted below with the blue points indicating the anomalies detected.'}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
 plot(as.vector(ts), main = 'Percentiles', type = 'l', xlab = 'Time', ylab = '')
@@ -660,7 +660,7 @@ countAnomaliesPercentiles <- length(which(residuals > threshold))
 
 `r if(period !=1) {'**Using confidence intervals: **'}`
 
-`r if(period !=1) {'In this second part, another technique is used. A confidence interval (or a prediction interval) gives an interval within which the true value of the series is expected to lie with a specified probability. The confidence interval is built around the smoothing value and all points that lie outside the given interval are anomalies. Again, the blue points are the detected anomalies.'}`
+`r if(period !=1) {'Now we use the confidence interval (or prediction interval) technique to detect anomalies. This technique defines an interval within which the true value of the series is expected to lie with a given probability. The confidence interval is built around the smoothing value and all points that lie outside the given interval are identified as anomalies. The results are plotted below with the blue points indicating the anomalies detected.'}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
 std_res <- sqrt(var(residuals))
@@ -684,9 +684,9 @@ countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 `r if(period !=1) {paste0('This technique has identified ', countAnomaliesConfidence, ' anomalous observations in the series.', sep = '')}`
 
 
-`r if(period !=1) {'### Annex: Use Cases'}`
+`r if(period !=1) {'### Annex: Use Case'}`
 
-`r if(period !=1) {'This report ends with a simple use case so that the user can get an idea of how to proceed with the knowledge he has acquired with the report. The period length, the type of seasonality and the three smoothing parameters are used to perform a Holt Winters smoothing automatically. Afterwards, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
+`r if(period !=1) {'We have devised a simple use case that illustrates how you can use the knowledge contained in the time series report. First, the period length, the type of seasonality and the three smoothing parameters are used to perform a Holt Winters smoothing automatically. Then, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
 
 ```{r, echo=FALSE, eval=(period!=1)}
 #link <- as.character('<style=\'nolink\'>http<!-- -->://github.com/DevoInc/python-sdk</style>')
