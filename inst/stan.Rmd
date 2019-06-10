@@ -48,12 +48,6 @@ if (length(args)==0) {
 data <- params$test
 ```
 
-```{r, echo = F, warning = F, message = F}
-message('data')
-#message(data[,2])
-message(colnames(data))
-```
-
 
 ```{r, echo = FALSE}
 #first thing to check: is the data is constant ? if so, we cannot do much!
@@ -68,6 +62,10 @@ if (constant){
   nullPresence <- FALSE
   negativePresence <-FALSE
   orderAR <- 0
+  decidingAdd <- TRUE
+  decidingMult <- TRUE
+  decidingBoth <- TRUE
+  one <- TRUE
 }
 ```
 
@@ -123,9 +121,9 @@ message(period)
 ```
 
 <div class="fluid-row" id="headerTitle"><h1 class="title toc-ignore"><span>Time series for column:</span>&nbsp;<strong>`r name`</strong></h1></div>
-
+  
 ### Introduction
-
+  
 This report describes the series as thoroughly as possible and aims to extract key information about the series so that the user can take informed decisions about the data. The report starts with some simple transformations and later offers more advanced checks. The goal of this functionality is to automatically define alert thresholds in order to enable anomaly detection. The annex of this report describes a use case in which the parameter values extracted in the report are used to perform time series smoothing and automatically detect anomalies. 
 
 ### 1) Descriptive Analysis and Missing Values 
@@ -136,7 +134,20 @@ This time series represents the evolution of the value of `r name`.
 plot(ts, ylab = name)
 ```
 
-It contains `r length(ts)` observations, going from `r as.POSIXct(params$from / 1000, origin="1970-01-01", tz = "UTC-2")` to `r as.POSIXct(params$to / 1000, origin="1970-01-01", tz = "UTC-2")`. 
+
+```{r, echo = F, warning = F, message = F}
+message('FROM')
+
+message(data[1,1])
+
+message(as.POSIXct(data[1,1], origin="1970-01-01"))
+
+message('TO')
+message(as.POSIXct(data[length(data[,1]),1]/1000, origin="1970-01-01"))
+```
+
+
+It contains `r length(ts)` observations, going from `r as.POSIXct(data[1,1], origin="1970-01-01")` to `r as.POSIXct(data[length(data[,1]),1], origin="1970-01-01")`. 
 
 ```{r, echo = FALSE, eval = (constant == TRUE)}
 const <- unique(na.omit(data[,2]))
@@ -150,7 +161,7 @@ nas <- sum(is.na(ts))
 
 if(nas == 0){
   chunki <- 'This time series is **not** missing any values, thus there is no need to interpolate.'
-}
+  }
 
 if (nas != 0){
   chunki <- paste('This time series contains ', nas, ' **missing values**. The solution is to linearly interpolate the NAs with the values that wrap the missing value. Missing values in the extremes of the series (first or last values) will be refilled with the closest point.')
@@ -168,28 +179,29 @@ mean_ts <- round(mean(ts), 3)
 `r if (constant == FALSE){chunki}`
 
 <!-- `r if (constant == FALSE){'We will normalize the series in order to have all values between 0 and 1. This will be useful when comparing it with other time series that have different units. We display the plot of the normalized series.'}` -->
-
-<!-- ```{r, echo = FALSE, eval = (constant == FALSE)} -->
-<!-- ts2 <- (ts - min_ts)/(max_ts - min_ts) -->
-<!-- plot(ts2, ylab = name) -->
-<!-- ``` -->
-
-
+  
+  <!-- ```{r, echo = FALSE, eval = (constant == FALSE)} -->
+  <!-- ts2 <- (ts - min_ts)/(max_ts - min_ts) -->
+  <!-- plot(ts2, ylab = name) -->
+  <!-- ``` -->
+  
+  
 `r if (constant == FALSE){'### 2) Computing the period length'}`
 
 ```{r, echo=FALSE, eval=(constant == FALSE)}
 if(period == 1){
-  chunk2 <- 'The period length is estimated with the **spectral density** technique and the result suggests that there is not a clear period. Unfortunately, nothing more can be said when the series is non-periodic and so the report ends up here.'
+chunk2 <- 'The period length is estimated with the **spectral density** technique and the result suggests that there is not a clear period. Unfortunately, nothing more can be said when the series is non-periodic and so the report ends up here.'
 }
 
 if (period !=1){
-  chunk2 <- 'In order to estimate the period length, we apply two techniques: autocorrelation and spectral density.
-
-**Autocorrelation:**
-
+     chunk2 <- 'In order to estimate the period length, we apply two techniques: autocorrelation and spectral density.
+  
+  **Autocorrelation:**
+  
 This technique correlates the original series with a lagged version of itself to calculate the period length. The period length is defined as the lag index of the first local maximum in the autocorrelation plot.
 
-The calculated coefficients are shown below:'
+  The calculated coefficients are shown below:
+  '
   
 }
 pValue = 0
@@ -198,13 +210,17 @@ nullPresence <- FALSE
 negativePresence <- FALSE
 my_lag <- 1
 orderAR <- 0
+decidingAdd <- TRUE
+decidingMult <- TRUE
+decidingBoth <- TRUE
+one <- TRUE
 ```
 
 `r if(constant == FALSE) {chunk2}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
 plot(acf(ts, plot = FALSE), main = 'Autocorrelation with lagged versions')
-legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2)
+legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2, bty = "n")
 ```
 
 ```{r, echo=FALSE, eval= (period!=1 & periodCorrelation != -1 )}
@@ -217,7 +233,7 @@ chunk2bis <- paste('It is not possible to detect a local maximum in the bar plot
 ```
 
 ```{r, echo=FALSE, eval=(period!=1)}
-  chunk2bisbis <- '
+chunk2bisbis <- '
 **Spectral Density:**
 
 This technique considers the spectral density of the time series and is based on the fact that the period is the inverse of the frequency. The period length is the frequency that corresponds to the peak value of spectral density.'
@@ -245,19 +261,19 @@ my_lag <- ndiffs(ts)
 testResult <- function (pValue){
   if (pValue < 0.05){
     return(paste0('The **Dickey-Fuller** test tests the null hypothesis H0: ‘The series contains a unit root’ (i.e. is
-not stationary). The alternative hypothesis is stationarity of the series. At a 0.05% level of confidence, the p-value (', round(pValue,3), ') is small and thus there is enough evidence to reject the null hypothesis and conclude that the series is indeed **stationary**.'));
+                  not stationary). The alternative hypothesis is stationarity of the series. At a 0.05% level of confidence, the p-value (', round(pValue,3), ') is small and thus there is enough evidence to reject the null hypothesis and conclude that the series is indeed **stationary**.'));
   }
-
+  
   else{
     return(paste0('The **Dickey-Fuller** test tests the null hypothesis H0: ‘The series contains a unit root’ (i.e. is
-not stationary). The alternative hypothesis is stationarity of the series. At a 0.05% level of confidence, the p-value (', round(pValue,3), ') is bigger enough to fail to reject the null hypothesis and conclude that the series is **not stationary**.'));
+                  not stationary). The alternative hypothesis is stationarity of the series. At a 0.05% level of confidence, the p-value (', round(pValue,3), ') is bigger enough to fail to reject the null hypothesis and conclude that the series is **not stationary**.'));
   }
-}
+  }
 
 differentiating <- function(pValue){
-    if (pValue < 0.05){
-      return ('The is no need to difference the time series. If an ARIMA(p,d,q) model were fitted, the d parameter that represents the degree of differencing would be equal to 0.')
-    }
+  if (pValue < 0.05){
+    return ('The is no need to difference the time series. If an ARIMA(p,d,q) model were fitted, the d parameter that represents the degree of differencing would be equal to 0.')
+  }
   else{
     return ('A way to make a series stationary is to differenciate it a certain number of times. The lagging of the series starts at level 1 and the lagging parameter is increased until the series is stationary.')
   }
@@ -308,7 +324,6 @@ if (sum(ts < 0) != 0){
 
 `r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {'Decomposition is a powerful statistical method that deconstructs a time series into several components (a trend, a periodic and a random component). In order to determine which decomposition model, additive or multiplicative, is more appropriate for the series we make two decompositions: one with the additive assumption and one with the multiplicative one. This is done in order to check how much correlation between data points is still encoded within the residuals. The autocorrelation that results in a lower coefficient will indicate a better fit and thus which decomposition model to apply.'}`
 
-
 ```{r, echo = F, warning = F, message = F}
 message('nullPresence')
 message(nullPresence)
@@ -322,41 +337,84 @@ message(negativePresence)
 
 `r if(period !=1 & negativePresence == TRUE & nullPresence == TRUE){'The time series contains values that are equal to 0 and also values that are below zero. This means that a multiplicative model is not possible. The reason behind this is because in a multiplicative model the trend is calculated as a division of two data points and thus a zero value is forbidden. Instead the **additive model** uses the substraction of data points and so it is used in this case.'}`
 
-`r if(period !=1 & nullPresence == FALSE & negativePresence == FALSE) {'The respective autocorrelations are plotted below:'}`
-
 
 ```{r, echo=FALSE, eval=(period!=1 & nullPresence == FALSE & negativePresence == FALSE)}
 randomAdd <- na.approx(decompose(ts, type = "additive")$random, rule = 2)
 randomMult <- na.approx(decompose(ts, type = "multiplicative")$random, rule = 2)
 
-plot(acf(randomAdd, plot = FALSE), main ='Autocorrelation on the additive residuals')
-legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2)
+#the decomposed series has a random component that is constant so the correlation is null
+#When this situation is met we cannot compare both and choose additive ones.
 
-plot(acf(randomMult, plot = FALSE), main = 'Autocorrelation on the multiplicative residuals')
-legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2)
+#if only the additive is constant but the multiplicative is not
+if ((length(unique(randomAdd)) == 1) & (length(unique(randomMult)) != 1)){
+  decidingAdd <- FALSE
+  one <- FALSE
+  typ <- 'multiplicative'
+}
 
+#if only the multiplicative is constant but the additive not
+if ((length(unique(randomAdd)) != 1) & (length(unique(randomMult)) == 1)){
+  decidingMult <- FALSE
+  one <- FALSE
+  typ <- 'additive'
+}
+
+#both of them are constant
+if ((length(unique(randomAdd)) == 1) & (length(unique(randomMult)) == 1)){
+  decidingBoth <- FALSE
+  one <- FALSE
+  typ <- 'additive'
+}
 ```
 
-```{r, echo=FALSE, eval=(period!=1 & nullPresence == FALSE & negativePresence == FALSE)}
+`r if(period !=1 & nullPresence == FALSE & negativePresence == FALSE & decidingBoth == FALSE) {'The random component of the series is constant for both additive and multiplicative and so their respective correlation cannot be used for comparison. We decide to use the default option which is additive. Even so, in this case, it is recommended to take the time to collect some more data so that this analysis is more accurate.'}`
+
+`r if(period !=1 & nullPresence == FALSE & negativePresence == FALSE & decidingAdd == FALSE) {'The random component of the series is constant for the additive model and so it cannot be used for comparison. The model used will be multiplicative and the autocorrelation is plotted below.'}`
+
+`r if(period !=1 & nullPresence == FALSE & negativePresence == FALSE & decidingMult == FALSE) {'The random component of the series is constant for the multiplicative model and so it cannot be used for comparison. The model used will be additive and the autocorrelation is plotted below.'}`
+
+`r if(period !=1 & nullPresence == FALSE & negativePresence == FALSE & one == TRUE) {'The respective autocorrelations are plotted below:'}`
+
+```{r, echo=FALSE, eval=(period!=1 & nullPresence == FALSE & negativePresence == FALSE & decidingAdd == FALSE)}
+acfMult <- sum(acf(randomMult, plot = FALSE)$acf^2)
+
+plot(acf(randomMult, plot = FALSE), main = 'Autocorrelation on the multiplicative residuals')
+legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2, bty = "n")
+```
+
+```{r, echo=FALSE, eval=(period!=1 & nullPresence == FALSE & negativePresence == FALSE & decidingMult == FALSE)}
+acfAdd <- sum(acf(randomAdd, plot = FALSE)$acf^2)
+
+plot(acf(randomAdd, plot = FALSE), main ='Autocorrelation on the additive residuals')
+legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2, bty = "n")
+```
+
+```{r, echo=FALSE, eval=(period!=1 & nullPresence == FALSE & negativePresence == FALSE & decidingBoth == TRUE)}
+plot(acf(randomAdd, plot = FALSE), main ='Autocorrelation on the additive residuals')
+legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2, bty = "n")
+
+plot(acf(randomMult, plot = FALSE), main = 'Autocorrelation on the multiplicative residuals')
+legend('topright', legend = 'Confidence Interval', col = 'blue', cex = 0.8, lty = 2, bty = "n")
+
 acfAdd <- sum(acf(randomAdd, plot = FALSE)$acf^2)
 acfMult <- sum(acf(randomMult, plot = FALSE)$acf^2)
 ```
 
-```{r, echo=FALSE, eval=(period!=1)}
+```{r, echo=FALSE, eval=(period!=1 & one == TRUE)}
 difference <- 0.01
 
 addOrMult <- function(addCoeff, multCoeff){
   if ((abs(addCoeff-multCoeff) <=  difference) & (nullPresence == FALSE) & (negativePresence == FALSE)){
-    res = paste0('In this case, both autocorrelation coefficients are very **similar**. The additive one equals ', round(addCoeff,3), ' and the multiplicative component equals ', round(multCoeff,3), '. Choosing one is not an obvious task, so the rest of this report will display the solutions for both of the decompositions and the user can choose which one suits his problem best.' )
+    res = paste0('In this case, both autocorrelation coefficients are very **similar**. The additive one equals ',         round(addCoeff,3), ' and the multiplicative component equals ', round(multCoeff,3), '. Choosing one is not an obvious task, so the rest of this report will display the solutions for both of the decompositions and the user can choose which one suits his problem best.' )
   }
   
   else{
     if (addCoeff < multCoeff){
-    res = paste0('In this case, the autocorrelation coefficient of the additive model (',round(addCoeff,3), ') is lesser than the multiplicative (',round(multCoeff,3),'), so we conclude that fitting an **additive model** is more accurate.')
+         res = paste0('In this case, the autocorrelation coefficient of the additive model (',round(addCoeff,3), ') is lesser than the multiplicative (',round(multCoeff,3),'), so we conclude that fitting an **additive model** is more accurate.')
     }
-
+    
     else{
-    res = paste0('In this case, the autocorrelation coefficient of the multiplicative model (',round(multCoeff,3),') is lesser than the additive (',round(addCoeff,3),'), so we conclude that fitting a **multiplicative model** is more accurate.');
+res = paste0('In this case, the autocorrelation coefficient of the multiplicative model (',round(multCoeff,3),') is lesser than the additive (',round(addCoeff,3),'), so we conclude that fitting a **multiplicative model** is more accurate.')
     }
   }
   return (res)
@@ -370,7 +428,7 @@ type <- function(addCoeff, multCoeff){
     if (addCoeff < multCoeff){
       return('additive')
     }
-
+    
     else{
       return ('multiplicative')  
     }
@@ -385,9 +443,9 @@ typ <- 'additive'
 ```
 
 
-`r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {addOrMult(acfAdd, acfMult)}`
+`r if(period !=1 & nullPresence == FALSE & negativePresence == FALSE & one == TRUE) {addOrMult(acfAdd, acfMult)}`
 
-`r if(period !=1 & nullPresence == FALSE & (negativePresence == FALSE)) {'Now that we’ve identified the seasonality type, we can decompose the series.'}`
+`r if(period !=1 & nullPresence == FALSE & negativePresence == FALSE & decidingBoth == TRUE) {'Now that we’ve identified the seasonality type, we can decompose the series.'}`
 
 ```{r, echo = F, warning = F, message = F}
 message('aqui')
@@ -442,7 +500,7 @@ orderAR <- findOrder(pacf(ts, plot = FALSE))
 
 `r if(period !=1) {'In this section, the **Holt Winters** triple exponential smoothing technique is applied to the time series. This method consists of smoothing the three components of our series. It is also used to predict some points ahead into the future and to filter anomalies (if any).'}`
 
-`r if(period !=1 & typ != 'both') {paste('As the seasonality was identified in section 4 as ', type(acfAdd, acfMult),', we apply the corresponding formala. Predictions are made for two periods into the future, in this case we are predicting ', period * 2 , ' points. After fitting the model, it is crucial to calculate goodness-of-fit indicators. The AIC and the BIC are computed in this report. The indicators alone do not provide much information but they are useful for a future model comparison/selection.', sep = '')}`
+`r if(period !=1 & typ != 'both') {paste('As the seasonality was identified in section 4 as ', typ,', we apply the corresponding formala. Predictions are made for two periods into the future, in this case we are predicting ', period * 2 , ' points. After fitting the model, it is crucial to calculate goodness-of-fit indicators. The AIC and the BIC are computed in this report. The indicators alone do not provide much information but they are useful for a future model comparison/selection.', sep = '')}`
 
 `r if(period !=1 & typ == 'both') {paste('There wasn\'t a clear decomposition type in section 4 so exponential smoothing for both models is made. Predictions are made for two periods into the future, in this case we are predicting ', period * 2 , ' points. After fitting the model, it is crucial to calculate goodness-of-fit indicators. The AIC and the BIC are computed in this report. The indicators alone do not provide much information but they are useful for a future model comparison/selection.', sep = '')}`
 
@@ -469,7 +527,6 @@ plot(hwinters, p, main = paste(typ, 'H-W smoothing'))
 legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), bty = "n", col = c('black', 'red', 'blue'), lty = c(1, 1, 1), inset = c(-0.025,-0.125), xpd = TRUE, horiz = TRUE)
 
 
-
 if(typ == 'additive'){
   hwA <- hwinters
 }
@@ -481,18 +538,10 @@ if(typ == 'multiplicative'){
 
 `r if((period !=1) & (typ != 'both')){paste('The **Nelder-Mead** optimization method is used in order to find the optimal values for the smoothing parameters. The results are: alpha = ', round(hwinters$alpha, 4), ', beta = ', round(hwinters$beta, 3), ' and gamma = ' , round(hwinters$gamma, 3), '.', sep = '')}`
 
-```{r, echo=FALSE, eval=((period!=1) & (typ != 'both') & (typ != 'null'))}
+```{r, echo=FALSE, eval=((period!=1) & (typ != 'both') & (typ != 'null')), warning=FALSE}
 t <- 'ZZA'
 if(typ == 'multiplicative'){
   t <- 'ZZM'
-}
-
-if (period > 24){
-  #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
-  fitArima <- auto.arima(ts)
-  aic <- fitArima$aic
-  aicc <- fitArima$aicc
-  bic <- fitArima$bic
 }
 
 if (period <= 24){
@@ -500,6 +549,14 @@ if (period <= 24){
   aic <- fitetsOne$aic
   aicc <- fitetsOne$aicc
   bic <- fitetsOne$bic
+}
+
+if (period > 24 | is.null(aic)){
+  #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
+  fitArima <- auto.arima(ts)
+  aic <- fitArima$aic
+  aicc <- fitArima$aicc
+  bic <- fitArima$bic
 }
 
 ```
@@ -564,6 +621,7 @@ if (period <= 24){
 `r if((period !=1) & (typ == 'both')){paste('In the multiplicative case, the AIC value is ', round(aicm,3),' and the BIC value is ', round(bic,3), '. These indicators can be useful in model selection.', sep = '')}`
 
 
+
 `r if(period !=1) {'### 7) Filtering Anomalies'}`
 
 `r if(period !=1) {'This report uses two techniques to identify possible anomalies: percentiles and confidence intervals.'}`
@@ -585,7 +643,6 @@ if (aica > aicm){
 ```
 
 `r if((period !=1) & (typ == 'both')) {paste('Choosing a model type has not been possible with automatic tools, so the model with the lowest AIC is selected, which in this case is ', lastType(aica, aicm), '.', sep = '')}`
-
 
 `r if(period !=1) {'First, we fit the Holt Winters smoothing model explained in the previous section in order to compute the residuals, or errors, by taking the absolute value of the difference between the smoothing values and the true values. This distribution is plotted as a histogram below.'}`
 
@@ -621,10 +678,10 @@ if (period > 24){
 
 if (period <= 24){
   if (aica <= aicm){
-      pred <- fitetsadd$fitted
+    pred <- fitetsadd$fitted
   }
   else{
-      pred <- fitetsmult$fitted
+    pred <- fitetsmult$fitted
   }
 }
 
@@ -636,8 +693,7 @@ hist(residuals, breaks = 50, main = 'Distribution of the residuals')
 
 `r if(period !=1) {'**Using percentiles: **'}`
 
-`r if(period !=1) {'Now we use the percentiles technique to identify anomalies based on the smoothed model.
-This technique is founded on the heuristic that any values not explained by the model are anomalies. In this report, the 95th percentile is fixed as the threshold for normality, but this percentile will be a variable in future versions. '}`
+`r if(period !=1) {'Now we use the percentiles technique to identify anomalies based on the smoothed model. This technique is founded on the heuristic that any values not explained by the model are anomalies. In this report, the 95th percentile is fixed as the threshold for normality, but this percentile will be a variable in future versions. '}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
 threshold <- quantile(residuals, 0.95)
@@ -645,8 +701,10 @@ threshold <- quantile(residuals, 0.95)
 
 `r if(period !=1) {paste0('Any data points that produced residual errors beyond the 95th percentile (which corresponds to the value ', round(threshold, 3), 'are identified as anomalies.', sep = '')}`
 
-`r if(period !=1) {'The results are plotted below with the blue points indicating the anomalies detected.'}`
 
+`r if(period !=1) {'The results are plotted below with the blue points indicating the anomalies detected.'}`
+ 
+ 
 ```{r, echo=FALSE, eval=(period!=1)}
 plot(as.vector(ts), main = 'Percentiles', type = 'l', xlab = 'Time', ylab = '')
 lines(1:length(ts), pred, col = 'red')
@@ -671,7 +729,7 @@ plot(1:length(ts), lower, type = 'n', main = 'Confidence intervals', xlab = 'Tim
 lines(1:length(ts), upper, col = 'grey')
 lines(1:length(ts), lower, col = 'grey')
 polygon(c(1:length(ts), rev(1:length(ts))), c(upper, rev(lower)),
-     col = "grey80", border = NA)
+        col = "grey80", border = NA)
 lines(1:length(ts), ts, col = 'black')
 lines(1:length(ts), pred, col = 'red')
 points(which((ts < lower) | (ts> upper)), ts[(ts < lower) | (ts > upper)], pch = 19, col = 'blue')
@@ -683,10 +741,9 @@ countAnomaliesConfidence <- length(which((ts < lower) | (ts> upper)))
 
 `r if(period !=1) {paste0('This technique has identified ', countAnomaliesConfidence, ' anomalous observations in the series.', sep = '')}`
 
-
 `r if(period !=1) {'### Annex: Use Case'}`
 
-`r if(period !=1) {'We have devised a simple use case that illustrates how you can use the knowledge contained in the time series report. First, the period length, the type of seasonality and the three smoothing parameters are used to perform a Holt Winters smoothing automatically. Then, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}` 
+`r if(period !=1) {'We have devised a simple use case that illustrates how you can use the knowledge contained in the time series report. First, the period length, the type of seasonality and the three smoothing parameters are used to perform a Holt Winters smoothing automatically. Then, the thresholds computed in the report are used to detect anomalies and thus define alerts.'}`
 
 ```{r, echo=FALSE, eval=(period!=1)}
 #link <- as.character('<style=\'nolink\'>http<!-- -->://github.com/DevoInc/python-sdk</style>')
@@ -698,12 +755,12 @@ link <- as.character('<span></span>github.com/DevoInc/python-sdk')
 
 ```{r, echo=FALSE, eval=(period!=1)}
 myQ <- paste(params$query, 'select', name)
-
 ty = 'add'
 if (t == 'ZZM'){
   ty = 'mult'
 }
 ```
+
 `r if(period !=1) {'**Code**'}` 
 
 ```{r comment=NA, echo=FALSE, eval=(period!=1)}
@@ -713,7 +770,6 @@ message('#Importing modules',
 '\nimport pandas as pd',
 '\nfrom statsmodels.tsa.api import ExponentialSmoothing',
 '\nimport numpy as np')
-
 message('#Extracting data from Devo',
 '\napi = Client(key="fill me!",',
               '\n             secret="fill me!",',
@@ -725,19 +781,16 @@ message('#Extracting data from Devo',
               '\n                     dates= {\'from\': "', params$from, '", \'to\': "', params$to, '"},',
               '\n                     response="csv",',
               '\n                     stream=False)')
-
 message('#Formatting and converting the data into a pandas series',
 '\nstring_list = [x.split(',') for x in response.splitlines()]',
 '\nnames = [\'', name ,'\']',
 '\ndf = pd.DataFrame(string_list, columns=names)',
 '\ndf = df.iloc[1:]',
 '\nts = pd.Series(data=df[\'', name ,'\'].tolist(), dtype=np.float)')
-
 message('#Parameters calculated in the report',
 '\nperiod = ', period, '\nalpha = ', hwinters$alpha, '\nbeta = ', hwinters$beta,
         '\ngamma = ', hwinters$gamma, '\ntype = "', ty, '"\nthresholdPercentile = ', threshold,
         '\nthresholdConfInt = ', std_res)
-
 message('#Doing smoothing',
 '\nets_model = ExponentialSmoothing(ts, seasonal_periods = period, seasonal= type)',
 '\nsmoothing = ets_model.fit(smoothing_level = alpha, smoothing_slope = beta, smoothing_seasonal = gamma)',
@@ -747,13 +800,16 @@ message('#Doing smoothing',
 '\n#Defining alerts',
 '\nresult_table[\'thresholdPercentile\'] = thresholdPercentile',
 '\nresult_table[\'thresholdConfInt\'] = thresholdConfInt',
-'\nresult_table[\'alertPercentile\'] = np.where(abs(result_table[\'True Series\'] - result_table[\'Smoothed Series\']) > result_table[\'thresholdPercentile\'], \'1\', \'0\')',
-'\nresult_table[\'alertConfInt\'] = np.where((result_table[\'True Series\'] < (result_table[\'Smoothed Series\'] - result_table[\'thresholdConfInt\'] * 1.96)), \'1\', \'0\')',
-'\nresult_table[\'alertConfInt\'] = np.where((result_table[\'True Series\'] > (result_table[\'Smoothed Series\'] + result_table[\'thresholdConfInt\'] * 1.96)), \'1\', \'0\')',
+'\nresult_table[\'alertPercentile\'] = np.where(abs(result_table[\'True Series\'] -',
+'\n                  result_table[\'Smoothed Series\']) > result_table[\'thresholdPercentile\'], \'1\', \'0\')',
+'\nresult_table[\'alertConfInt\'] = np.where((result_table[\'True Series\'] < ',
+'\n             (result_table[\'Smoothed Series\'] - result_table[\'thresholdConfInt\'] * 1.96)), \'1\', \'0\')',
+'\nresult_table[\'alertConfInt\'] = np.where((result_table[\'True Series\'] > ',
+'\n             (result_table[\'Smoothed Series\'] + result_table[\'thresholdConfInt\'] * 1.96)), \'1\', \'0\')',
 '\nprint(result_table)')
-
 message('#Inject back into Devo\'s platform',
-'\ncon = Sender.from_config({"address": "fill me!", "port": 443, "key": "fill me!", "cert": "fill me!", "chain": "also...fill me!"})',
+'\ncon = Sender.from_config({"address": "fill me!", "port": 443, "key": "fill me!",',
+'\n                          "cert": "fill me!", "chain": "also...fill me!"})',
 '\nsending_table = result_table.to_string(header=False,',
                    '\n                    index=False,',
                    "\n                    index_names=False).split('\\n')",
