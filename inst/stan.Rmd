@@ -346,23 +346,26 @@ randomMult <- na.approx(decompose(ts, type = "multiplicative")$random, rule = 2)
 #When this situation is met we cannot compare both and choose additive ones.
 
 #if only the additive is constant but the multiplicative is not
-if ((length(unique(randomAdd)) == 1) & (length(unique(randomMult)) != 1)){
+#if ((length(unique(randomAdd)) == 1) & (length(unique(randomMult)) != 1)){
+if ((var(randomAdd) < 0.0000001) & (length(unique(randomMult)) != 1)){
   decidingAdd <- FALSE
   one <- FALSE
   typ <- 'multiplicative'
 }
 
 #if only the multiplicative is constant but the additive not
-if ((length(unique(randomAdd)) != 1) & (length(unique(randomMult)) == 1)){
+if ((length(unique(randomAdd)) != 1) & (var(randomMult) < 0.0000001)){
   decidingMult <- FALSE
   one <- FALSE
   typ <- 'additive'
 }
 
 #both of them are constant
-if ((length(unique(randomAdd)) == 1) & (length(unique(randomMult)) == 1)){
+if ((var(randomAdd) < 0.0000001) & (var(randomMult) < 0.0000001)){
   decidingBoth <- FALSE
   one <- FALSE
+  decidingAdd <- TRUE
+  decidingMult <- TRUE
   typ <- 'additive'
 }
 ```
