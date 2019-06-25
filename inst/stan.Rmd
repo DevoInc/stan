@@ -503,7 +503,7 @@ orderAR <- findOrder(pacf(ts, plot = FALSE))
 
 `r if(period !=1) {'In this section, the **Holt Winters** triple exponential smoothing technique is applied to the time series. This method consists of smoothing the three components of our series. It is also used to predict some points ahead into the future and to filter anomalies (if any).'}`
 
-`r if(period !=1 & typ != 'both') {paste('As the seasonality was identified in section 4 as ', typ,', we apply the corresponding formala. Predictions are made for two periods into the future, in this case we are predicting ', period * 2 , ' points. After fitting the model, it is crucial to calculate goodness-of-fit indicators. The AIC and the BIC are computed in this report. The indicators alone do not provide much information but they are useful for a future model comparison/selection.', sep = '')}`
+`r if(period !=1 & typ != 'both') {paste('As the seasonality was identified in section 4 as ', typ,', we apply the corresponding formula. Predictions are made for two periods into the future, in this case we are predicting ', period * 2 , ' points. After fitting the model, it is crucial to calculate goodness-of-fit indicators. The AIC and the BIC are computed in this report. The indicators alone do not provide much information but they are useful for a future model comparison/selection.', sep = '')}`
 
 `r if(period !=1 & typ == 'both') {paste('There wasn\'t a clear decomposition type in section 4 so exponential smoothing for both models is made. Predictions are made for two periods into the future, in this case we are predicting ', period * 2 , ' points. After fitting the model, it is crucial to calculate goodness-of-fit indicators. The AIC and the BIC are computed in this report. The indicators alone do not provide much information but they are useful for a future model comparison/selection.', sep = '')}`
 
@@ -554,7 +554,7 @@ if (period <= 24){
   bic <- fitetsOne$bic
 }
 
-if (period > 24 | is.null(aic)){
+if (period > 24){
   #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
   fitArima <- auto.arima(ts)
   aic <- fitArima$aic
