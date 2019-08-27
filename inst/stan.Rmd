@@ -236,7 +236,7 @@ chunk2bis <- paste('It is not possible to detect a local maximum in the bar plot
 chunk2bisbis <- '
 **Spectral Density:**
 
-This technique considers the spectral density of the time series and is based on the fact that the period is the inverse of the frequency. The period length is the frequency that corresponds to the peak value of spectral density.'
+This technique considers the spectral density of the time series and is based on the fact that the period is the inverse of the frequency. First of all, the series is detrended so that the spectrum at low frequencies is not affected by the trend. The result given is the period associated to the frequency that corresponds to the peak value of the spectral density.'
 ```
 
 `r if(period !=1) {chunk2bis}`
@@ -245,7 +245,8 @@ This technique considers the spectral density of the time series and is based on
 
 
 ```{r, echo=FALSE, eval=(period!=1)}
-plot(spec.ar(ts, plot = FALSE), main = paste('Spectral Density of', name), ylab = 'Spectral Density')
+x <- residuals(tslm(ts ~ trend))
+plot(spec.ar(x, plot = FALSE), main = paste('Spectral Density of', name), ylab = 'Spectral Density')
 ```
 
 `r if (period != 1) {paste('This method returns a period of length ', period, '. Recent empirical studies have found that this method performs better than autocorrelation. Therefore, we will use this result in future calculations.', sep = '')}`
@@ -547,14 +548,19 @@ if(typ == 'multiplicative'){
   t <- 'ZZM'
 }
 
+arima = FALSE
+
 if (period <= 24){
   fitetsOne <- ets(ts, model = t)
   aic <- fitetsOne$aic
   aicc <- fitetsOne$aicc
   bic <- fitetsOne$bic
+  if (is.null(aic)){
+	    arima = TRUE
+	}
 }
 
-if (period > 24){
+if (period > 24 | arima){
   #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
   fitArima <- auto.arima(ts)
   aic <- fitArima$aic
@@ -574,19 +580,25 @@ pA <-predict(hwA, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwA, pA, main ='Additive H-W smoothing')
 legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1, bty = "n")
 
-if (period > 24){
-  #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
-  fitArima <- auto.arima(ts)
-  aica <- fitArima$aic
-  aicc <- fitArima$aicc
-  bic <- fitArima$bic
-}
+arima = FALSE
 
 if (period <= 24){
   fitetsadd <- ets(ts, model = t)
   aica <- fitetsadd$aic
   aicc <- fitetsadd$aicc
   bic <- fitetsadd$bic
+  
+  if (is.null(aica)){
+    arima = TRUE
+  } 
+}
+
+if (period > 24 | arima){
+  #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
+  fitArima <- auto.arima(ts)
+  aica <- fitArima$aic
+  aicc <- fitArima$aicc
+  bic <- fitArima$bic
 }
 ```
 
@@ -602,21 +614,26 @@ pM <-predict(hwM, n.ahead = period * 2, prediction.interval = TRUE)
 plot(hwM, pM, main = 'Multiplicative H-W smoothing')
 legend('topleft', legend = c('True Series', 'Smoothing','Prediction Interval'), col = c('black', 'red', 'blue'), cex = 0.8, lty = 1, bty = "n")
 
-if (period > 24){
-  #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
-  #fit <- auto.arima(ts)
-  aicm <- fitArima$aic
-  aicc <- fitArima$aicc
-  bic <- fitArima$bic
-}
+arima = FALSE
 
 if (period <= 24){
   fitetsmult <- ets(ts, model = t)
   aicm <- fitetsmult$aic
   aicc <- fitetsmult$aicc
   bic <- fitetsmult$bic
+  
+  if (is.null(aicm)){
+		arima = TRUE
+	}
 }
 
+if (period > 24 | arima){
+  #the ets function does not allow us to fit a TS model when the period is too long that is why we use the arima technique
+  #fit <- auto.arima(ts)
+  aicm <- fitArima$aic
+  aicc <- fitArima$aicc
+  bic <- fitArima$bic
+}
 ```
 
 `r if((period !=1) & (typ == 'both')){paste('The **Nelder-Mead** optimization method is used in order to find the optimal values for the smoothing parameters. The results are: alpha = ',round(hwM$alpha, 4), ', beta = ', round(hwM$beta, 3), ' and gamma = ' , round(hwM$gamma, 3), '.', sep = '')}`
