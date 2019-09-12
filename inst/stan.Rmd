@@ -719,7 +719,7 @@ hist(residuals, breaks = 50, main = 'Distribution of the residuals')
 threshold <- quantile(residuals, 0.95)
 ```
 
-`r if(period !=1) {paste0('Any data points that produced residual errors beyond the 95th percentile (which corresponds to the value ', round(threshold, 3), 'are identified as anomalies.', sep = '')}`
+`r if(period !=1) {paste0('Any data points that produced residual errors beyond the 95th percentile (which corresponds to the value ', round(threshold, 3), ') are identified as anomalies.', sep = '')}`
 
 
 `r if(period !=1) {'The results are plotted below with the blue points indicating the anomalies detected.'}`
