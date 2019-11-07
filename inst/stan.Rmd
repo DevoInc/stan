@@ -146,7 +146,7 @@ message('TO')
 message(as.POSIXct(data[length(data[,1]),1]/1000, origin="1970-01-01"))
 ```
 
-It contains `r length(ts)` observations, going from `r as.POSIXct(params$from / 1000, origin="1970-01-01", tz = "UTC-2")` to `r as.POSIXct(params$to / 1000, origin="1970-01-01", tz = "UTC-2")`.
+It contains `r length(ts)` observations, going from `r as.POSIXct(params$from / 1000, origin="1970-01-01", tz = "UTC-1")` to `r as.POSIXct(params$to / 1000, origin="1970-01-01", tz = "UTC-1")`.
 
 ```{r, echo = FALSE, eval = (constant == TRUE)}
 const <- unique(na.omit(data[,2]))
