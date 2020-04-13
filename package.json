@@ -24,7 +24,7 @@
     "url": "https://github.com/DevoInc/stan/issues"
   },
   "homepage": "https://github.com/DevoInc/stan#readme",
-  "dependencies": {
+  "devDependencies": {
     "axios": ">=0.18.1",
     "chai": "^4.2.0",
     "mocha": "^5.2.0"
